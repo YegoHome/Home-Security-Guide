@@ -1,5 +1,7 @@
 # Your Home Security Guide
 
+> **Experimental learning guide.** Use at your own risk. Please read the [Disclaimer](DISCLAIMER.md) before applying any steps.
+
 A free, beginner-friendly, five-part interactive guide to checking and securing the network "doors" (ports) on a Windows 11 computer. It uses one house metaphor all the way through.
 
 | Part | Topic |
