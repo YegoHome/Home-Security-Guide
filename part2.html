@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Security Guide — Part 2: Managing the Locks</title>
+<meta property="og:title" content="Home Security Guide — Part 2: Managing the Locks">
+<meta name="description" content="Part 2 of 5: choose your network type, then lock risky doors with Windows Defender Firewall using point-and-click steps you can undo.">
+<meta property="og:description" content="Part 2 of 5: choose your network type, then lock risky doors with Windows Defender Firewall using point-and-click steps you can undo.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the guide</a>
+<header class="topbar">
+  <a class="home" href="index.html">Home Security Guide</a>
+  <nav aria-label="Parts of the guide">
+    <ul class="part-dots">
+      <li><a href="part1.html" aria-label="Part 1: The Security Walk">1</a></li>
+      <li><a href="part2.html" aria-current="page" aria-label="Part 2: Managing the Locks">2</a></li>
+      <li><a href="part3.html" aria-label="Part 3: The Guest Rooms">3</a></li>
+      <li><a href="part4.html" aria-label="Part 4: Sealed Envelopes">4</a></li>
+      <li><a href="part5.html" aria-label="Part 5: The Regular Patrol">5</a></li>
+    </ul>
+  </nav>
+  <button class="keyring-btn" type="button">Key Ring</button>
+</header>
+
+<main id="main" class="book-container" data-next-href="part3.html" data-next-label="Go to Part 3">
+
+  <!-- 1 Cover -->
+  <section class="book-page" aria-label="Cover">
+    <div class="cover-page">
+      <p class="cover-kicker">Part 2 of 5</p>
+      <div class="cover-decorator" aria-hidden="true">🏠 🔒</div>
+      <h1 class="cover-title">Your Home Security Guide</h1>
+      <p class="cover-subtitle">Part 2: Managing the Locks</p>
+      <div class="decorative-line"></div>
+      <p><strong>Welcome back.</strong> In Part 1, you walked around your digital home and wrote down which doors were open.</p>
+      <p>Now you'll <strong>lock the risky ones</strong>.</p>
+      <div class="meta-row"><span>About 20 minutes</span><span>Administrator permission needed</span><span>Have your Part 1 notes ready</span></div>
+      <button class="btn" type="button" data-action="next">Start this section →</button>
+    </div>
+  </section>
+
+  <!-- 2 Metaphor -->
+  <section class="book-page" aria-label="How locks work">
+    <h1>How Locks Work</h1>
+    <div class="metaphor">
+      <span class="tag">The house metaphor</span>
+      <ul style="margin-bottom:0">
+        <li>An <strong>open door</strong> = anyone who can reach it can walk up and try to come in.</li>
+        <li>A <strong>locked door</strong> = visitors from other devices are stopped. Nobody has a key.</li>
+        <li>A <strong>locked door with a household key</strong> = strangers are stopped, but devices on your own home network can still come in.</li>
+      </ul>
+    </div>
+    <p>The program behind a locked door keeps running. The lock only stops visitors arriving from other devices.</p>
+    <h2>What we'll do</h2>
+    <ol>
+      <li>Check your <strong>house type</strong> (Public or Private network).</li>
+      <li>Use the <strong>security desk</strong> (Windows Defender Firewall) to add locks. This part uses clicks, not commands.</li>
+      <li>Check your locks with one read-only command at the end.</li>
+    </ol>
+    <div class="note"><strong>Everything here can be undone.</strong> Page 11 shows how to switch off or remove any lock in seconds.</div>
+  </section>
+
+  <!-- 3 House type -->
+  <section class="book-page" aria-label="Step 1: Check your house type">
+    <h1>Step 1: Check Your House Type</h1>
+    <p>Windows treats each network you join as <strong>Public</strong> or <strong>Private</strong>. This decides which built-in doors Windows opens.</p>
+    <ol>
+      <li>Open <span class="highlight">Settings</span> → <span class="highlight">Network &amp; internet</span>.</li>
+      <li>Select <strong>Wi-Fi</strong> and then your network, or select <strong>Ethernet</strong>.</li>
+      <li>Find <strong>Network profile type</strong>.</li>
+    </ol>
+    <div class="table-container">
+      <table>
+        <tr><th>House type</th><th>What Microsoft says</th></tr>
+        <tr><td><strong>Public network (Recommended)</strong></td><td>Your PC is hidden from other devices on the network, so it can't be used for file and printer sharing. Recommended for most networks, including home.</td></tr>
+        <tr><td><strong>Private network</strong></td><td>Your PC is discoverable and can be used for file and printer sharing. Only for networks where you know and trust the people and devices.</td></tr>
+      </table>
+    </div>
+    <p>Source: <a href="https://support.microsoft.com/en-us/windows/essential-network-settings-and-tasks-in-windows-f21a9bbc-c582-55cd-35e0-73431160a1b9" target="_blank" rel="noopener">Microsoft Support, essential network settings</a>.</p>
+    <div class="ok"><strong>Simplest safe choice:</strong> if you don't share files or a printer <em>from this PC</em>, keep the network set to <strong>Public</strong>.</div>
+  </section>
+
+  <!-- 4 Choose path -->
+  <section class="book-page" aria-label="Step 2: Choose your path">
+    <h1>Step 2: Choose Your Path</h1>
+    <p>Do other devices in your home open files or use a printer that's <strong>connected to this PC</strong>?</p>
+    <div class="chooser" role="group" aria-label="Choose your path">
+      <button class="choice" type="button" data-path="A" aria-pressed="false"><strong>Path A: No</strong>Nobody uses files or a printer from this PC. (Most people.)</button>
+      <button class="choice" type="button" data-path="B" aria-pressed="false"><strong>Path B: Yes</strong>Other home devices use files or a printer from this PC.</button>
+    </div>
+    <div class="path-unset note">Pick a path above. The rest of Part 2 (and Part 4) will show the matching steps. You can change it any time.</div>
+    <div class="path-only path-A ok"><strong>Path A:</strong> locks go on <strong>all three</strong> profiles (Domain, Private, Public). Nobody gets a key. This PC can still open files and printers on <em>other</em> devices, because these locks only stop visitors coming <em>in</em>.</div>
+    <div class="path-only path-B note"><strong>Path B:</strong> locks for doors 135, 139 and 445 go on <strong>Domain and Public only</strong>. That way, on public Wi-Fi nobody gets in, while at home Windows' own sharing rules handle visitors. In Step 7 you'll give those sharing rules a <strong>household key</strong>, so only devices on your home network get in.</div>
+  </section>
+
+  <!-- 5 Security desk -->
+  <section class="book-page" aria-label="Step 3: Open the security desk">
+    <h1>Step 3: Open the Security Desk</h1>
+    <p>This is where locks are installed and removed.</p>
+    <ol>
+      <li>Press <span class="highlight">Windows + R</span>.</li>
+      <li>Type <span class="highlight">wf.msc</span> and press <span class="highlight">Enter</span>.</li>
+    </ol>
+    <p>Or press the Windows key, type <span class="highlight">firewall</span>, and choose <strong>Windows Defender Firewall with Advanced Security</strong>.</p>
+    <div class="note"><strong>Master keys needed:</strong> Windows may ask "Do you want to allow this app to make changes to your device?" Select <strong>Yes</strong>. This is the master-keys moment from Part 1.</div>
+    <h3>What you'll see in the left column</h3>
+    <ul>
+      <li><strong>Inbound Rules</strong>: visitors coming in (this is where we work)</li>
+      <li><strong>Outbound Rules</strong>: traffic leaving your computer</li>
+      <li><strong>Connection Security Rules</strong>: advanced settings we won't touch</li>
+      <li><strong>Monitoring</strong>: what's active right now</li>
+    </ul>
+  </section>
+
+  <!-- 6 Inbound rules -->
+  <section class="book-page" aria-label="Step 4: Read the inbound rules">
+    <h1>Step 4: Read the Inbound Rules</h1>
+    <p>Click <span class="highlight">Inbound Rules</span> in the left column.</p>
+    <div class="warning"><strong>Don't panic.</strong> You'll see hundreds of rules. That's normal. Windows and your apps create them for everyday features. <strong>We won't change any existing rule</strong> (except the optional household key in Step 7, Path B).</div>
+    <h3>What the columns mean</h3>
+    <div class="table-container">
+      <table>
+        <tr><th>Column</th><th>Translation</th></tr>
+        <tr><td><strong>Name</strong></td><td>What the rule is for</td></tr>
+        <tr><td><strong>Profile</strong></td><td>Which house types it applies to (Domain, Private, Public, or All)</td></tr>
+        <tr><td><strong>Enabled</strong></td><td><strong>Yes</strong> = active, <strong>No</strong> = switched off</td></tr>
+        <tr><td><strong>Action</strong></td><td><strong>Allow</strong> or <strong>Block</strong> visitors</td></tr>
+        <tr><td><strong>Remote Address</strong></td><td>Which visitors it covers (Any, or a list such as Local subnet)</td></tr>
+        <tr><td><strong>Protocol</strong> and <strong>Local Port</strong></td><td>Which door number the rule is about</td></tr>
+      </table>
+    </div>
+    <p>Scroll right to see Remote Address, Protocol, and Local Port.</p>
+  </section>
+
+  <!-- 7 First lock -->
+  <section class="book-page" aria-label="Step 5: Install your first lock">
+    <h1>Step 5: Install Your First Lock</h1>
+    <p>We'll lock door <strong>135</strong> (RPC, a Windows networking service).</p>
+    <ol>
+      <li>In the right-hand <strong>Actions</strong> panel, click <span class="highlight">New Rule...</span></li>
+      <li><strong>Rule Type:</strong> choose <strong>Port</strong> → <strong>Next</strong></li>
+      <li><strong>Protocol and Ports:</strong> choose <strong>TCP</strong>, then <strong>Specific local ports</strong>: <span class="highlight">135</span> → <strong>Next</strong></li>
+      <li><strong>Action:</strong> choose <strong>Block the connection</strong> → <strong>Next</strong></li>
+      <li><strong>Profile:</strong>
+        <span class="path-only path-A">check <strong>Domain, Private and Public</strong> → <strong>Next</strong></span>
+        <span class="path-only path-B">check <strong>Domain and Public</strong>, uncheck <strong>Private</strong> → <strong>Next</strong></span>
+        <span class="path-unset">depends on your path (go back to Step 2 to choose) → <strong>Next</strong></span>
+      </li>
+      <li><strong>Name:</strong> <span class="highlight">Lock - RPC 135</span></li>
+      <li><strong>Description</strong> (optional): <em>Stops visitors from other devices reaching RPC door 135.</em></li>
+      <li>Click <strong>Finish</strong>.</li>
+    </ol>
+    <div class="ok"><strong>Your first lock is in.</strong> Visitors from other devices can no longer reach door 135 <span class="path-only path-A">on any network.</span><span class="path-only path-B">on Public or Domain networks.</span></div>
+    <div class="note"><strong>Why every name starts with "Lock - ":</strong> it makes your locks easy to find, check, and remove later. Parts 4 and 5 rely on this name.</div>
+  </section>
+
+  <!-- 8 Reference table -->
+  <section class="book-page" aria-label="Step 6: Lock the other doors">
+    <h1>Step 6: Lock the Other Doors</h1>
+    <p>Repeat Step 5 for each door below <strong>that appeared as LISTENING in your Part 1 notes</strong>. Skip doors you didn't see.</p>
+    <p class="path-badge">Your path: <span data-path-label>not chosen yet</span></p>
+    <div class="table-container">
+      <table>
+        <tr><th>Door (TCP)</th><th>Used by</th><th>Rule name</th><th>Profiles</th><th>Risk</th></tr>
+        <tr><td>135</td><td>RPC (Windows networking)</td><td>Lock - RPC 135</td><td><span class="path-only path-A">All three</span><span class="path-only path-B">Domain, Public</span><span class="path-unset">See your path</span></td><td><span class="chip high">High</span></td></tr>
+        <tr><td>139</td><td>NetBIOS (older file sharing)</td><td>Lock - NetBIOS 139</td><td><span class="path-only path-A">All three</span><span class="path-only path-B">Domain, Public</span><span class="path-unset">See your path</span></td><td><span class="chip high">High</span></td></tr>
+        <tr><td>445</td><td>SMB (file sharing)</td><td>Lock - SMB 445</td><td><span class="path-only path-A">All three</span><span class="path-only path-B">Domain, Public</span><span class="path-unset">See your path</span></td><td><span class="chip high">High</span></td></tr>
+        <tr><td>2179</td><td>Hyper-V connections to virtual machines</td><td>Lock - Hyper-V 2179</td><td>All three</td><td><span class="chip med">Medium</span></td></tr>
+        <tr><td>5040</td><td>Connected Devices Platform (cross-device features)</td><td>Lock - CDP 5040</td><td>All three</td><td><span class="chip low">Low</span></td></tr>
+        <tr><td>7680</td><td>Delivery Optimization (peer update sharing)</td><td>Lock - Delivery Optimization 7680</td><td>All three</td><td><span class="chip low">Low</span></td></tr>
+      </table>
+    </div>
+    <h3>What each lock changes</h3>
+    <ul>
+      <li><strong>2179:</strong> other PCs can't open your Hyper-V virtual machines remotely. Opening them on this PC is unaffected. Part 3 covers guest rooms.</li>
+      <li><strong>5040:</strong> may affect cross-device features such as Nearby Sharing or Phone Link. If one stops working, switch this lock off (page 11).</li>
+      <li><strong>7680:</strong> Microsoft says blocking it <a href="https://learn.microsoft.com/en-us/windows/deployment/do/delivery-optimization-configure" target="_blank" rel="noopener">turns off peer-to-peer sharing, while updates still download normally</a> over HTTP/HTTPS.</li>
+    </ul>
+  </section>
+
+  <!-- 9 Household key (Path B) -->
+  <section class="book-page" aria-label="Step 7: Household key">
+    <h1>Step 7: The Household Key</h1>
+    <div class="path-only path-A ok"><strong>Path A: you can skip this page.</strong> Your locks cover every network, and nobody needs a household key.</div>
+    <div class="path-unset note">This step is for Path B only. Go back to Step 2 if you haven't chosen a path.</div>
+    <div class="path-only path-B">
+      <p>On your Private home network, Windows' built-in <strong>File and Printer Sharing</strong> rules let visitors in. Give them a household key so only devices on your home network get through.</p>
+      <ol>
+        <li>In <strong>Inbound Rules</strong>, find <strong>File and Printer Sharing (SMB-In)</strong> where the Profile column shows <strong>Private</strong>.</li>
+        <li>Double-click it and open the <strong>Scope</strong> tab.</li>
+        <li>Under <strong>Remote IP address</strong>, choose <strong>These IP addresses</strong> → <strong>Add...</strong></li>
+        <li>Choose <strong>Predefined set of computers</strong> → <strong>Local subnet</strong> → <strong>OK</strong> → <strong>OK</strong>.</li>
+        <li>Repeat for any other enabled <strong>File and Printer Sharing</strong> rules with the Private profile that show <strong>Any</strong> under Remote Address.</li>
+      </ol>
+      <div class="note"><strong>Check first:</strong> if Remote Address already says <strong>Local subnet</strong>, that rule already has a household key. Leave it as it is.</div>
+    </div>
+  </section>
+
+  <!-- 10 Firmware doors -->
+  <section class="book-page" aria-label="Firmware doors">
+    <h1>A Special Case: Firmware Doors</h1>
+    <p>Doors <strong>623, 664 and 16992–16995</strong> belong to <strong>Intel Active Management Technology (AMT)</strong>, a hardware management feature mostly found on business PCs.</p>
+    <div class="warning">
+      <p><strong>Windows locks may not cover these doors.</strong> Intel's documentation says that when AMT is enabled, <a href="https://software.intel.com/sites/manageability/AMT_Implementation_and_Reference_Guide/WordDocuments/manageabilityports.htm" target="_blank" rel="noopener">messages on a wired network go directly to Intel AMT</a>, before Windows sees them. Over Wi-Fi, the Windows wireless driver passes them along.</p>
+    </div>
+    <h3>What to do if you saw these doors in Part 1</h3>
+    <ol>
+      <li>You can still add Windows locks named <span class="highlight">Lock - Intel AMT 16992</span> and so on, but don't rely on them alone.</li>
+      <li>If you don't use AMT, the real fix is to switch it off in your PC's firmware (BIOS/UEFI) settings. Menu names differ between manufacturers, so follow your PC maker's support page.</li>
+      <li>If this is a work computer, ask your IT department before changing anything. They may use AMT to manage it.</li>
+    </ol>
+  </section>
+
+  <!-- 11 Undo -->
+  <section class="book-page" aria-label="Step 8: Undoing a mistake">
+    <h1>Step 8: Undoing a Mistake</h1>
+    <p>If something you need stops working after a lock goes in (a printer, a shared folder, Nearby Sharing), undo that lock right away.</p>
+    <h3>Switch a lock off (keeps it for later)</h3>
+    <ol>
+      <li>Go to <strong>Inbound Rules</strong>.</li>
+      <li>Find your lock. Clicking the <strong>Name</strong> column header sorts names so your <strong>Lock - </strong> rules sit together.</li>
+      <li>Right-click it → <strong>Disable Rule</strong>. The door unlocks right away.</li>
+    </ol>
+    <h3>Remove a lock completely</h3>
+    <ol>
+      <li>Right-click the lock → <strong>Delete</strong> → <strong>Yes</strong>.</li>
+    </ol>
+    <div class="ok"><strong>One lock at a time:</strong> after each new lock, try the features you care about. If one breaks, you'll know which lock caused it.</div>
+  </section>
+
+  <!-- 12 Test -->
+  <section class="book-page" aria-label="Step 9: Testing your work">
+    <h1>Step 9: Testing Your Work</h1>
+    <h3>Check that your locks exist</h3>
+    <p>Open a standard <strong>Terminal</strong> (the visitor pass from Part 1) and run:</p>
+    <div class="code" data-label="PowerShell"><pre>Get-NetFirewallRule -DisplayName "Lock - *" |
+  Format-Table DisplayName, Enabled, Action, Profile -AutoSize</pre></div>
+    <p>Each lock should show <strong>Enabled: True</strong> and <strong>Action: Block</strong>. If Windows says access is denied, close the window and use <strong>Terminal (Admin)</strong> for this check.</p>
+    <h3>Optional: test from another Windows PC</h3>
+    <ol>
+      <li>On <strong>this</strong> PC, run <code class="inline">ipconfig</code> and note the <strong>IPv4 Address</strong> (for example, 192.168.1.25).</li>
+      <li>On <strong>another</strong> Windows PC on the same network, open Terminal and run:</li>
+    </ol>
+    <div class="code" data-label="PowerShell — on the other PC"><pre>Test-NetConnection -ComputerName 192.168.1.25 -Port 135</pre></div>
+    <p>Replace the address with yours. <strong>TcpTestSucceeded : False</strong> means the door stayed shut. The test may pause for a while first, because Windows Firewall drops blocked visitors without replying.</p>
+    <p class="path-only path-B"><strong>Path B note:</strong> if your network is set to Private, a test of door 445 from a home device can succeed. That's expected, because devices on your home network have a household key.</p>
+    <p>Finish by typing <code class="inline">exit</code> to <strong>close the gate</strong>.</p>
+  </section>
+
+  <!-- 13 Summary -->
+  <section class="book-page" aria-label="Summary">
+    <h1>Part 2 Complete</h1>
+    <div class="table-container">
+      <table>
+        <tr><th>Before</th><th>After</th></tr>
+        <tr><td>Risky doors could be reached by other devices</td><td>Each risky door you found now has a <strong>Lock - </strong> rule</td></tr>
+        <tr><td>House type never checked</td><td>You know whether you're on Public or Private, and why</td></tr>
+        <tr class="path-only path-B"><td>File sharing open to any address</td><td>File sharing limited to your home network (household key)</td></tr>
+        <tr><td>Firmware doors unknown</td><td>You know Intel AMT doors need a firmware fix, not just a Windows lock</td></tr>
+      </table>
+    </div>
+    <h3>What stays the same</h3>
+    <ul>
+      <li>This PC can still open files and printers on other devices.</li>
+      <li>Windows Update still downloads normally.</li>
+      <li class="path-only path-B">Devices on your home network can still use files and printers from this PC.</li>
+      <li>Any lock can be switched off or removed in seconds (page 11).</li>
+    </ul>
+    <h2>Next: Part 3, The Guest Rooms</h2>
+    <p>If you use virtual machines (Hyper-V or VirtualBox), each one is a guest room with its own doors. Part 3 shows how to lock them and remove old hallways. No virtual machines? Skip to Part 4.</p>
+    <h3>Sources</h3>
+    <ul class="sources">
+      <li>Microsoft Support, network profiles: <a href="https://support.microsoft.com/en-us/windows/essential-network-settings-and-tasks-in-windows-f21a9bbc-c582-55cd-35e0-73431160a1b9" target="_blank" rel="noopener">https://support.microsoft.com/en-us/windows/essential-network-settings-and-tasks-in-windows-f21a9bbc-c582-55cd-35e0-73431160a1b9</a></li>
+      <li>Microsoft Learn, Get-NetFirewallRule: <a href="https://learn.microsoft.com/en-us/powershell/module/netsecurity/get-netfirewallrule" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netsecurity/get-netfirewallrule</a></li>
+      <li>Microsoft Learn, Test-NetConnection: <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection</a></li>
+      <li>Microsoft Learn, Delivery Optimization ports: <a href="https://learn.microsoft.com/en-us/windows/deployment/do/delivery-optimization-configure" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows/deployment/do/delivery-optimization-configure</a></li>
+      <li>Microsoft Learn, firewall stealth mode (silent drops): <a href="https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd448557(v=ws.10)" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd448557(v=ws.10)</a></li>
+      <li>Intel, AMT manageability ports: <a href="https://software.intel.com/sites/manageability/AMT_Implementation_and_Reference_Guide/WordDocuments/manageabilityports.htm" target="_blank" rel="noopener">https://software.intel.com/sites/manageability/AMT_Implementation_and_Reference_Guide/WordDocuments/manageabilityports.htm</a></li>
+      <li>Port 5040 and CDPSvc (third-party reference): <a href="https://www.pentestpad.com/port-exploit/port-5040-windows-diagnostics-hub-standard-collector" target="_blank" rel="noopener">https://www.pentestpad.com/port-exploit/port-5040-windows-diagnostics-hub-standard-collector</a></li>
+    </ul>
+  </section>
+
+</main>
+<script src="assets/guide.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

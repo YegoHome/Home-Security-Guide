@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Security Guide — Part 4: Sealed Envelopes</title>
+<meta property="og:title" content="Home Security Guide — Part 4: Sealed Envelopes">
+<meta name="description" content="Part 4 of 5: check that the doors you keep open use encryption (TLS), and tighten Remote Desktop and remote PowerShell.">
+<meta property="og:description" content="Part 4 of 5: check that the doors you keep open use encryption (TLS), and tighten Remote Desktop and remote PowerShell.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the guide</a>
+<header class="topbar">
+  <a class="home" href="index.html">Home Security Guide</a>
+  <nav aria-label="Parts of the guide">
+    <ul class="part-dots">
+      <li><a href="part1.html" aria-label="Part 1: The Security Walk">1</a></li>
+      <li><a href="part2.html" aria-label="Part 2: Managing the Locks">2</a></li>
+      <li><a href="part3.html" aria-label="Part 3: The Guest Rooms">3</a></li>
+      <li><a href="part4.html" aria-current="page" aria-label="Part 4: Sealed Envelopes">4</a></li>
+      <li><a href="part5.html" aria-label="Part 5: The Regular Patrol">5</a></li>
+    </ul>
+  </nav>
+  <button class="keyring-btn" type="button">Key Ring</button>
+</header>
+
+<main id="main" class="book-container" data-next-href="part5.html" data-next-label="Go to Part 5">
+
+  <!-- 1 Cover -->
+  <section class="book-page" aria-label="Cover">
+    <div class="cover-page">
+      <p class="cover-kicker">Part 4 of 5</p>
+      <div class="cover-decorator" aria-hidden="true">🏠 ✉️</div>
+      <h1 class="cover-title">Your Home Security Guide</h1>
+      <p class="cover-subtitle">Part 4: Sealed Envelopes</p>
+      <div class="decorative-line"></div>
+      <p>Some doors stay open on purpose, such as Remote Desktop or file sharing. For those, the goal changes: make sure everything said through them is <strong>sealed</strong>.</p>
+      <div class="meta-row"><span>About 20 minutes</span><span>Mostly read-only checks</span></div>
+      <button class="btn" type="button" data-action="next">Start this section →</button>
+    </div>
+  </section>
+
+  <!-- 2 Metaphor -->
+  <section class="book-page" aria-label="How sealed envelopes work">
+    <h1>Locks and Envelopes</h1>
+    <div class="metaphor">
+      <span class="tag">The house metaphor</span>
+      <ul style="margin-bottom:0">
+        <li>A <strong>lock</strong> (Parts 2 and 3) decides <strong>who</strong> can reach a door.</li>
+        <li>A <strong>postcard</strong> (unencrypted traffic) can be read by anyone it passes on the way.</li>
+        <li>A <strong>sealed envelope</strong> (TLS encryption) keeps the message private and shows if anyone tampered with it.</li>
+        <li>An <strong>ID badge</strong> (certificate) proves the computer answering really is the one you meant to reach.</li>
+      </ul>
+    </div>
+    <p>You need both. A locked door with a household key still lets your home devices in, and what they say should be sealed.</p>
+    <h2>What we'll check</h2>
+    <ol>
+      <li>Which talking doors are open on this PC</li>
+      <li>Remote Desktop (door 3389)</li>
+      <li>File sharing (door 445)</li>
+      <li>Envelope strength (TLS versions)</li>
+      <li>Any server app you installed yourself</li>
+    </ol>
+  </section>
+
+  <!-- 3 Inventory -->
+  <section class="book-page" aria-label="Step 1: Find the talking doors">
+    <h1>Step 1: Find the Talking Doors</h1>
+    <p>Open a standard <strong>Terminal</strong> (the visitor pass) and check the doors that usually carry conversations:</p>
+    <div class="code" data-label="PowerShell"><pre>Get-NetTCPConnection -State Listen -LocalPort 80,443,445,3389,5985,5986 -ErrorAction SilentlyContinue |
+  Sort-Object LocalPort |
+  Format-Table LocalAddress, LocalPort, OwningProcess -AutoSize</pre></div>
+    <div class="table-container">
+      <table>
+        <tr><th>Door</th><th>Usually</th><th>Go to</th></tr>
+        <tr><td>3389</td><td>Remote Desktop</td><td>Step 2</td></tr>
+        <tr><td>445</td><td>File sharing (SMB)</td><td>Step 3</td></tr>
+        <tr><td>80, 443</td><td>A web server or app you installed</td><td>Step 5</td></tr>
+        <tr><td>5985, 5986</td><td>PowerShell remote management (WinRM)</td><td>See below</td></tr>
+      </table>
+    </div>
+    <p><strong>No output</strong> means none of these doors are open. Read the pages anyway so you know what to check if one appears later.</p>
+    <div class="note"><strong>About 5985 and 5986:</strong> Microsoft says Windows Server is enabled for PowerShell remoting by default, but other Windows computers, such as Windows 11 PCs, <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_requirements" target="_blank" rel="noopener">must have remoting turned on</a> before they accept remote connections. If either door appears and you didn't set up remote management on purpose, write it down and ask whoever manages this PC. If this is a work PC, ask your IT department.</div>
+  </section>
+
+  <!-- 4 RDP -->
+  <section class="book-page" aria-label="Step 2: Remote Desktop">
+    <h1>Step 2: The Remote Desktop Door (3389)</h1>
+    <p>Windows 11 Home can't accept Remote Desktop visitors. Only Pro and Enterprise editions can. On Home, you can skip this page.</p>
+    <h3>Check the setting</h3>
+    <ol>
+      <li>Open <span class="highlight">Settings</span> → <span class="highlight">System</span> → <span class="highlight">Remote Desktop</span>.</li>
+      <li><strong>Don't use it?</strong> Turn <strong>Remote Desktop</strong> to <strong>Off</strong>. That closes door 3389.</li>
+      <li><strong>Do use it?</strong> Make sure <strong>Require devices to use Network Level Authentication to connect</strong> is turned on. Microsoft <a href="http://learn.microsoft.com/en-us/windows/client-management/client-tools/connect-to-remote-aadj-pc" target="_blank" rel="noopener">recommends this option</a>.</li>
+    </ol>
+    <div class="metaphor"><span class="tag">The house metaphor</span><strong>Network Level Authentication</strong> is an ID check at the gate. Visitors must prove who they are before the door even opens.</div>
+    <h3>Confirm the envelope (read-only)</h3>
+    <div class="code" data-label="PowerShell"><pre>Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' |
+  Select-Object SecurityLayer, UserAuthentication</pre></div>
+    <div class="table-container">
+      <table>
+        <tr><th>Value</th><th>Meaning</th></tr>
+        <tr><td>SecurityLayer <strong>2</strong></td><td>TLS is used to set up the connection (sealed envelope)</td></tr>
+        <tr><td>SecurityLayer <strong>1</strong></td><td>Negotiate: client and server agree on the method (the Windows default)</td></tr>
+        <tr><td>SecurityLayer <strong>0</strong></td><td>Older RDP security, not TLS</td></tr>
+        <tr><td>UserAuthentication <strong>1</strong></td><td>Network Level Authentication is required</td></tr>
+      </table>
+    </div>
+    <p>Source: <a href="https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-terminalservices-rdp-winstationextensions-securitylayer" target="_blank" rel="noopener">Microsoft Learn, SecurityLayer</a>.</p>
+  </section>
+
+  <!-- 5 RDP household key -->
+  <section class="book-page" aria-label="Remote Desktop household key">
+    <h1>Remote Desktop: Give It a Household Key</h1>
+    <p>If you keep Remote Desktop on, limit it to devices on your home network. This uses the same household key as Part 2.</p>
+    <ol>
+      <li>Open the security desk: <span class="highlight">Windows + R</span> → <span class="highlight">wf.msc</span> → <strong>Yes</strong>.</li>
+      <li>Select <strong>Inbound Rules</strong> and find <strong>Remote Desktop - User Mode (TCP-In)</strong>.</li>
+      <li>Double-click it → <strong>Scope</strong> tab → under <strong>Remote IP address</strong>, choose <strong>These IP addresses</strong> → <strong>Add...</strong></li>
+      <li>Choose <strong>Predefined set of computers</strong> → <strong>Local subnet</strong> → <strong>OK</strong> → <strong>OK</strong>.</li>
+      <li>Repeat for <strong>Remote Desktop - User Mode (UDP-In)</strong>.</li>
+    </ol>
+    <div class="warning"><strong>Remote Desktop over the internet:</strong> this guide doesn't cover opening Remote Desktop to the internet (for example, with port forwarding on your router). If you need access from outside your home, use a secure method your router or VPN provider documents, and don't create a router hallway straight to door 3389.</div>
+  </section>
+
+  <!-- 6 SMB -->
+  <section class="book-page" aria-label="Step 3: File sharing">
+    <h1>Step 3: The File-Sharing Door (445)</h1>
+    <p class="path-badge">Your path from Part 2: <span data-path-label>not chosen yet</span></p>
+    <h3>Everyone: check for the old postcard protocol</h3>
+    <div class="code" data-label="PowerShell"><pre>Get-SmbServerConfiguration | Format-List EnableSMB1Protocol, EncryptData</pre></div>
+    <ul>
+      <li><strong>EnableSMB1Protocol : False</strong> is what you want. SMB1 is the old version of file sharing. Microsoft's guide <a href="https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3" target="_blank" rel="noopener">explains how to detect and disable it</a>.</li>
+      <li><strong>EncryptData : False</strong> means Windows doesn't require every file-sharing conversation to be sealed.</li>
+    </ul>
+    <div class="path-only path-A ok"><strong>Path A:</strong> your Part 2 locks already stop visitors at door 445 on every network. No further change is needed.</div>
+    <div class="path-only path-B">
+      <h3>Path B: seal every file-sharing envelope (optional)</h3>
+      <p>In <strong>Terminal (Admin)</strong>:</p>
+      <div class="code" data-label="PowerShell — Admin"><pre>Set-SmbServerConfiguration -EncryptData $true</pre></div>
+      <p>Type <strong>Y</strong> if asked to confirm. Devices that only support older file-sharing versions won't be able to connect after this. To undo:</p>
+      <div class="code" data-label="PowerShell — Admin"><pre>Set-SmbServerConfiguration -EncryptData $false</pre></div>
+    </div>
+    <div class="path-unset note">Choose your path in <a href="part2.html#page-4">Part 2, Step 2</a> to see the matching instructions here.</div>
+  </section>
+
+  <!-- 7 TLS versions -->
+  <section class="book-page" aria-label="Step 4: Envelope strength">
+    <h1>Step 4: Envelope Strength (TLS Versions)</h1>
+    <p>TLS 1.0 and 1.1 are old, weak envelopes. Microsoft says that starting with Windows 11 Insider Preview builds in September 2023, and <a href="https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features-resources" target="_blank" rel="noopener">continuing in future Windows releases</a>, they are disabled by default.</p>
+    <h3>Check what your PC has been told (read-only)</h3>
+    <div class="code" data-label="PowerShell"><pre>Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols' -Recurse -ErrorAction SilentlyContinue |
+  ForEach-Object { [pscustomobject]@{ Protocol = $_.PSParentPath.Split('\')[-1]; Side = $_.PSChildName; Enabled = $_.GetValue('Enabled') } } |
+  Where-Object { $_.Side -in 'Client','Server' } | Format-Table -AutoSize</pre></div>
+    <div class="table-container">
+      <table>
+        <tr><th>You see</th><th>Meaning</th></tr>
+        <tr><td>Nothing, or no Enabled value</td><td>No override. Windows uses its built-in defaults.</td></tr>
+        <tr><td>TLS 1.0 or TLS 1.1, <strong>Enabled 1</strong></td><td>Something turned the old envelopes back on</td></tr>
+        <tr><td>TLS 1.0 or TLS 1.1, <strong>Enabled 0</strong></td><td>Old envelopes are switched off</td></tr>
+      </table>
+    </div>
+    <div class="warning"><strong>If TLS 1.0 or 1.1 shows Enabled 1:</strong> an app on this PC may have needed it. Write down the result and check with whoever set up the PC or the app's maker before changing it.</div>
+  </section>
+
+  <!-- 8 TLS optional disable -->
+  <section class="book-page" aria-label="Turning off old envelopes">
+    <h1>Optional: Turn Off the Old Envelopes</h1>
+    <p>Only do this if Step 4 showed TLS 1.0 or 1.1 with <strong>Enabled 1</strong> on the <strong>Server</strong> side, and you've confirmed nothing needs them. It affects visitors connecting <em>to</em> this PC.</p>
+    <p>In <strong>Terminal (Admin)</strong>:</p>
+    <div class="code" data-label="PowerShell — Admin"><pre>reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /t REG_DWORD /d 0 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /t REG_DWORD /d 0 /f</pre></div>
+    <p>Microsoft's <a href="https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings" target="_blank" rel="noopener">TLS registry settings</a> page says setting <strong>Enabled</strong> to <strong>0</strong> disables a protocol version, and that apps or services may need a restart to pick it up. Restart your PC so every service picks it up.</p>
+    <h3>To undo</h3>
+    <p>Delete the values you added. Windows then goes back to its defaults:</p>
+    <div class="code" data-label="PowerShell — Admin"><pre>reg delete "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server" /v Enabled /f
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server" /v Enabled /f</pre></div>
+    <p>Then restart again. Close the gate with <code class="inline">exit</code>.</p>
+  </section>
+
+  <!-- 9 App servers -->
+  <section class="book-page" aria-label="Step 5: Apps you installed">
+    <h1>Step 5: Server Apps You Installed</h1>
+    <p>If Step 1 showed doors 80, 443, or any other door that belongs to a program you installed (a media server, game server, or web app):</p>
+    <ol>
+      <li>Open that app's settings or documentation and look for <strong>HTTPS</strong>, <strong>TLS</strong>, or <strong>SSL</strong>.</li>
+      <li>Turn it on and give it a certificate (ID badge), following the app maker's instructions.</li>
+      <li>Turn off the unencrypted option (often door 80) if the app allows it.</li>
+      <li>Give the app's firewall rule a household key, as in Part 2, Step 7.</li>
+    </ol>
+    <h3>Check which envelope a door uses</h3>
+    <p>This read-only check connects to a door and reports the TLS version. Try it first with a public site, then replace both names with your app's address:</p>
+    <div class="code" data-label="PowerShell"><pre>$name = 'www.microsoft.com'
+$tcp  = New-Object System.Net.Sockets.TcpClient($name, 443)
+$ssl  = New-Object System.Net.Security.SslStream($tcp.GetStream())
+$ssl.AuthenticateAsClient($name)
+"Envelope: " + $ssl.SslProtocol
+$ssl.Dispose(); $tcp.Dispose()</pre></div>
+    <p>You should see <strong>Tls12</strong> or <strong>Tls13</strong>. An error on the <code class="inline">AuthenticateAsClient</code> line usually means the ID badge isn't trusted by this PC (for example, a self-signed certificate) or the door doesn't use TLS.</p>
+  </section>
+
+  <!-- 10 Summary -->
+  <section class="book-page" aria-label="Summary">
+    <h1>Part 4 Complete</h1>
+    <ul class="checklist" style="margin-left:0">
+      <li><span aria-hidden="true">✓</span><span>Found which talking doors are open</span></li>
+      <li><span aria-hidden="true">✓</span><span>Turned Remote Desktop off, or required ID at the gate (NLA) and gave it a household key</span></li>
+      <li><span aria-hidden="true">✓</span><span>Confirmed SMB1 is off<span class="path-only path-B">, and optionally sealed every file-sharing envelope</span></span></li>
+      <li><span aria-hidden="true">✓</span><span>Checked TLS versions without changing anything by default</span></li>
+      <li><span aria-hidden="true">✓</span><span>Knew how to check which envelope a door uses</span></li>
+    </ul>
+    <h2>Next: Part 5, The Regular Patrol</h2>
+    <p>Everything you've done so far can drift as you install apps and run tests. Part 5 sets up a regular, read-only patrol with a dated logbook.</p>
+    <h3>Sources</h3>
+    <ul class="sources">
+      <li>Microsoft, set up Remote Desktop (Pro required): <a href="https://www.microsoft.com/en-us/microsoft-365/business-insights-ideas/resources/set-up-and-configure-remote-desktop" target="_blank" rel="noopener">https://www.microsoft.com/en-us/microsoft-365/business-insights-ideas/resources/set-up-and-configure-remote-desktop</a></li>
+      <li>Microsoft Learn, Remote Desktop and Network Level Authentication: <a href="http://learn.microsoft.com/en-us/windows/client-management/client-tools/connect-to-remote-aadj-pc" target="_blank" rel="noopener">http://learn.microsoft.com/en-us/windows/client-management/client-tools/connect-to-remote-aadj-pc</a></li>
+      <li>Microsoft Learn, SecurityLayer: <a href="https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-terminalservices-rdp-winstationextensions-securitylayer" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-terminalservices-rdp-winstationextensions-securitylayer</a></li>
+      <li>Microsoft Learn, PowerShell remoting requirements: <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_requirements" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_requirements</a></li>
+      <li>Microsoft Learn, Get-SmbServerConfiguration: <a href="https://learn.microsoft.com/en-us/powershell/module/smbshare/get-smbserverconfiguration" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/smbshare/get-smbserverconfiguration</a></li>
+      <li>Microsoft Learn, detect and disable SMBv1: <a href="https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3</a></li>
+      <li>Microsoft Learn, TLS 1.0/1.1 disablement: <a href="https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features-resources" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features-resources</a></li>
+      <li>Microsoft Learn, TLS registry settings: <a href="https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/security/tls/tls-registry-settings</a></li>
+    </ul>
+  </section>
+
+</main>
+<script src="assets/guide.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

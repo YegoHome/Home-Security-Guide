@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Security Guide — Part 1: The Security Walk</title>
+<meta property="og:title" content="Home Security Guide — Part 1: The Security Walk">
+<meta name="description" content="Part 1 of 5: find which network doors (ports) are open on your Windows 11 PC, which program opened them, and which side of the house they face. Look only, change nothing.">
+<meta property="og:description" content="Part 1 of 5: find which network doors (ports) are open on your Windows 11 PC, which program opened them, and which side of the house they face. Look only, change nothing.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the guide</a>
+<header class="topbar">
+  <a class="home" href="index.html">Home Security Guide</a>
+  <nav aria-label="Parts of the guide">
+    <ul class="part-dots">
+      <li><a href="part1.html" aria-current="page" aria-label="Part 1: The Security Walk">1</a></li>
+      <li><a href="part2.html" aria-label="Part 2: Managing the Locks">2</a></li>
+      <li><a href="part3.html" aria-label="Part 3: The Guest Rooms">3</a></li>
+      <li><a href="part4.html" aria-label="Part 4: Sealed Envelopes">4</a></li>
+      <li><a href="part5.html" aria-label="Part 5: The Regular Patrol">5</a></li>
+    </ul>
+  </nav>
+  <button class="keyring-btn" type="button">Key Ring</button>
+</header>
+
+<main id="main" class="book-container" data-next-href="part2.html" data-next-label="Go to Part 2">
+
+  <!-- 1 Cover -->
+  <section class="book-page" aria-label="Cover">
+    <div class="cover-page">
+      <p class="cover-kicker">Part 1 of 5</p>
+      <div class="cover-decorator" aria-hidden="true">🏠 🔦</div>
+      <h1 class="cover-title">Your Home Security Guide</h1>
+      <p class="cover-subtitle">Part 1: The Security Walk</p>
+      <div class="decorative-line"></div>
+      <p>Think of your computer as your home. Just like you check your doors and windows before going to sleep, we're going to take a walk around your digital home.</p>
+      <p><strong>In this part, we change nothing.</strong> We only look.</p>
+      <div class="meta-row"><span>About 15 minutes</span><span>No administrator rights needed</span></div>
+      <button class="btn" type="button" data-action="next">Start the walk →</button>
+    </div>
+  </section>
+
+  <!-- 2 Metaphor -->
+  <section class="book-page" aria-label="How the house works">
+    <h1>How Your Digital Home Works</h1>
+    <p>Programs on your computer open numbered <strong>doors</strong> (called <em>ports</em>) so other devices can talk to them. Door 445, for example, is used for Windows file sharing.</p>
+    <div class="metaphor">
+      <span class="tag">The house metaphor</span>
+      <ul style="margin-bottom:0">
+        <li>An <strong>open door</strong> (LISTENING) is open and waiting. Anyone who can reach it can walk up and try to come in. Nobody needs to knock.</li>
+        <li>An <strong>inside door</strong> only connects rooms inside your home. Other devices can't reach it.</li>
+        <li>A <strong>door on every side</strong> faces every network your computer is on. Only your locks decide who gets through.</li>
+      </ul>
+    </div>
+    <h2>Today's goal</h2>
+    <p>Make a list of the open doors, who opened each one, and which side of the house it faces. In Part 2, you'll use that list to decide which doors to lock.</p>
+    <div class="note"><strong>Seeing open doors is normal.</strong> Many are part of Windows itself. The goal is to spot the ones that shouldn't be reachable from other devices.</div>
+  </section>
+
+  <!-- 3 Right tool -->
+  <section class="book-page" aria-label="Step 1: Finding the right tool">
+    <h1>Step 1: Finding the Right Tool</h1>
+    <p>Windows has a built-in program called <strong>PowerShell</strong>. In Windows 11, it usually opens inside an app called <strong>Terminal</strong>. It looks like a dark window with text, but it's easier than it appears.</p>
+    <ol>
+      <li>Find the <span class="highlight">Start</span> button (the Windows logo) at the bottom of your screen.</li>
+      <li><strong>Right-click</strong> it (or press <span class="highlight">Windows + X</span>).</li>
+      <li>A menu appears. Look for <strong>Terminal</strong> or <strong>Windows PowerShell</strong>.</li>
+    </ol>
+    <h3>Which option should you choose?</h3>
+    <div class="table-container">
+      <table>
+        <tr><th>What you see</th><th>Like having…</th><th>For Part 1</th></tr>
+        <tr><td><strong>Terminal</strong> or <strong>Windows PowerShell</strong></td><td>A <strong>visitor pass</strong>: you can walk around, look, and take notes</td><td><span class="chip low">Choose this one</span></td></tr>
+        <tr><td><strong>Terminal (Admin)</strong> or <strong>Windows PowerShell (Admin)</strong></td><td>The <strong>master keys</strong>: full access to change locks and settings</td><td><span class="chip high">Skip for now</span></td></tr>
+      </table>
+    </div>
+    <p>Windows protects itself from accidental changes. If something needs the master keys, you'll see an error like "Access is denied." That's a safety feature, not a bug.</p>
+    <p>Today we're only looking, so the visitor pass is the right choice.</p>
+  </section>
+
+  <!-- 4 Starting -->
+  <section class="book-page" aria-label="Step 2: Starting the walk">
+    <h1>Step 2: Starting the Walk</h1>
+    <p>When the window opens, you'll see a blinking cursor and a line like this:</p>
+    <div class="code" data-label="What you'll see (example)"><pre>PS C:\Users\YourName&gt;</pre></div>
+    <p>This is your <strong>Command Center</strong>. It's waiting for you to type an instruction.</p>
+    <h3>Getting comfortable</h3>
+    <ul>
+      <li>Click once inside the window so the cursor is active.</li>
+      <li>Type or paste a command, then press <span class="highlight">Enter</span>.</li>
+      <li>To paste, <strong>right-click</strong> inside the window or press <span class="highlight">Ctrl + V</span>.</li>
+      <li>Every command in Part 1 only reads information. None of them change anything.</li>
+    </ul>
+    <div class="note"><strong>Tip:</strong> every gray command box in this guide has a <strong>Copy</strong> button. Copying avoids typing mistakes.</div>
+  </section>
+
+  <!-- 5 netstat -->
+  <section class="book-page" aria-label="Step 3: Checking for open doors">
+    <h1>Step 3: Checking for Open Doors</h1>
+    <p>Ask your computer to list every connection and every open door:</p>
+    <div class="code" data-label="PowerShell"><pre>netstat -ano</pre></div>
+    <p>A long list scrolls by. Don't worry, we're only looking for patterns. According to <a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netstat" target="_blank" rel="noopener">Microsoft's netstat reference</a>, <code class="inline">-a</code> shows connections and listening ports, <code class="inline">-n</code> shows numbers instead of names, and <code class="inline">-o</code> adds the process ID (PID) of the program that owns each line.</p>
+    <h3>The Decoder Ring</h3>
+    <div class="table-container">
+      <table>
+        <tr><th>Word you see</th><th>In the house</th><th>What it means</th></tr>
+        <tr><td><strong>LISTENING</strong></td><td>An open door, waiting for visitors</td><td>A program is ready to accept a connection</td></tr>
+        <tr><td><strong>ESTABLISHED</strong></td><td>A conversation happening through a door right now</td><td>Your computer is actively talking to another device</td></tr>
+        <tr><td><strong>TIME_WAIT</strong></td><td>A conversation just ended; the door is closing slowly</td><td>The connection is finished and Windows is tidying up</td></tr>
+        <tr><td><strong>CLOSE_WAIT</strong></td><td>The visitor left, but you're still holding the door</td><td>The other side ended; this computer hasn't fully let go yet</td></tr>
+      </table>
+    </div>
+    <h3>Cleaner view: open doors only</h3>
+    <div class="code" data-label="PowerShell"><pre>netstat -ano | findstr LISTENING</pre></div>
+  </section>
+
+  <!-- 6 Which side -->
+  <section class="book-page" aria-label="Step 4: Which side of the house">
+    <h1>Step 4: Which Side of the House?</h1>
+    <p>Look at the <strong>Local Address</strong> column. The part before the colon shows which side of the house the door faces. The number after the colon is the door number.</p>
+    <div class="code" data-label="Example only — your numbers will differ"><pre>  Proto  Local Address        Foreign Address      State        PID
+  TCP    0.0.0.0:135          0.0.0.0:0            LISTENING    1052
+  TCP    0.0.0.0:445          0.0.0.0:0            LISTENING    4
+  TCP    127.0.0.1:5354       0.0.0.0:0            LISTENING    3920
+  TCP    192.168.1.25:139     0.0.0.0:0            LISTENING    4</pre></div>
+    <div class="table-container">
+      <table>
+        <tr><th>Local Address starts with</th><th>In the house</th><th>Who could reach it</th></tr>
+        <tr><td><code class="inline">0.0.0.0</code> or <code class="inline">[::]</code></td><td><strong>Door on every side</strong></td><td>Devices on any network this computer is connected to, unless a lock stops them</td></tr>
+        <tr><td><code class="inline">127.0.0.1</code> or <code class="inline">[::1]</code></td><td><strong>Inside door</strong></td><td>Only programs on this same computer</td></tr>
+        <tr><td>A specific address, such as <code class="inline">192.168.1.25</code></td><td>A door on <strong>one</strong> side</td><td>Devices on the network that address belongs to</td></tr>
+      </table>
+    </div>
+    <div class="note"><strong>What to write down:</strong> every LISTENING line whose address starts with <code class="inline">0.0.0.0</code>, <code class="inline">[::]</code>, or a specific address. Inside doors (<code class="inline">127.0.0.1</code>, <code class="inline">[::1]</code>) can't be reached from other devices.</div>
+  </section>
+
+  <!-- 7 Who opened it -->
+  <section class="book-page" aria-label="Step 5: Who opened this door">
+    <h1>Step 5: Who Opened This Door?</h1>
+    <p>netstat shows a PID, which is just a number. This command lists open doors with the <strong>program name</strong> next to each one:</p>
+    <div class="code" data-label="PowerShell"><pre>Get-NetTCPConnection -State Listen |
+  Sort-Object LocalPort |
+  Select-Object LocalAddress, LocalPort, OwningProcess,
+    @{Name='Program'; Expression={ (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName }} |
+  Format-Table -AutoSize</pre></div>
+    <h3>Reading the Program column</h3>
+    <ul>
+      <li><strong>System</strong> (PID 4) and <strong>svchost</strong> are parts of Windows itself. svchost runs many Windows services, so one name can cover several doors.</li>
+      <li>A program you recognize, such as a game launcher or chat app, is usually expected.</li>
+      <li>A name you <strong>don't</strong> recognize goes on your list to look up. It isn't automatically dangerous.</li>
+    </ul>
+    <h3>Looking up an unknown program</h3>
+    <ol>
+      <li>Press <span class="highlight">Ctrl + Shift + Esc</span> to open Task Manager.</li>
+      <li>Select <strong>Details</strong>, then find the matching number in the <strong>PID</strong> column.</li>
+      <li>Right-click it and choose <strong>Open file location</strong> or <strong>Search online</strong>.</li>
+    </ol>
+    <h3>Optional: mail slots (UDP)</h3>
+    <p>Some openings are <strong>mail slots</strong>. They accept messages without starting a conversation, so they never say LISTENING. To see them:</p>
+    <div class="code" data-label="PowerShell"><pre>Get-NetUDPEndpoint | Sort-Object LocalPort |
+  Select-Object LocalAddress, LocalPort, OwningProcess,
+    @{Name='Program'; Expression={ (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName }} |
+  Format-Table -AutoSize</pre></div>
+  </section>
+
+  <!-- 8 Normal vs notice -->
+  <section class="book-page" aria-label="Step 6: What is normal">
+    <h1>Step 6: Normal, or Worth Noticing?</h1>
+    <h3>Usually normal</h3>
+    <ul>
+      <li>ESTABLISHED conversations from your web browser, email, Windows Update, and other apps you use</li>
+      <li>Inside doors on <code class="inline">127.0.0.1</code> or <code class="inline">[::1]</code></li>
+    </ul>
+    <h3>Worth noticing (and where this guide handles them)</h3>
+    <div class="table-container">
+      <table>
+        <tr><th>Door</th><th>Usually belongs to</th><th>Handled in</th></tr>
+        <tr><td>135, 139, 445</td><td>Windows networking and file/printer sharing</td><td>Part 2</td></tr>
+        <tr><td>2179</td><td>Hyper-V virtual machine connections</td><td>Parts 2 and 3</td></tr>
+        <tr><td>5040, 7680</td><td>Windows cross-device features and peer update sharing</td><td>Part 2</td></tr>
+        <tr><td>623, 664, 16992–16995</td><td>Intel hardware management (firmware doors)</td><td>Part 2</td></tr>
+        <tr><td>3389</td><td>Remote Desktop</td><td>Part 4</td></tr>
+        <tr><td>5985, 5986</td><td>PowerShell remote management</td><td>Part 4</td></tr>
+        <tr><td>Any door from a program you don't recognize</td><td>Look it up (Step 5)</td><td>Parts 1 and 5</td></tr>
+      </table>
+    </div>
+    <div class="note">Doors 135, 139 and 445 are often targeted by attackers <strong>when other devices can reach them</strong>. Seeing them here doesn't mean anything is wrong. It means they're worth a lock (Part 2).</div>
+  </section>
+
+  <!-- 9 Notes -->
+  <section class="book-page" aria-label="Step 7: Taking notes">
+    <h1>Step 7: Taking Notes</h1>
+    <p>Saving what you found helps you compare later. Part 2 starts from these notes.</p>
+    <ol>
+      <li>Click and drag to highlight the text in the window.</li>
+      <li>Press <span class="highlight">Ctrl + C</span> (or right-click and choose <strong>Copy</strong>).</li>
+      <li>Open <strong>Notepad</strong> from the Start menu.</li>
+      <li>Press <span class="highlight">Ctrl + V</span> to paste.</li>
+      <li>Save the file as <span class="highlight">Security_Walk_Notes.txt</span> on your Desktop.</li>
+    </ol>
+    <h3>A simple notes template</h3>
+    <div class="code" data-label="Copy into Notepad"><pre>Security Walk - date: __________
+Door | Local Address | Program | Side of house | Part that handles it
+445  | 0.0.0.0       | System  | every side    | Part 2
+</pre></div>
+    <div class="ok"><strong>Good habit:</strong> keep this first file. In Part 5, your regular patrol will save dated logbooks you can compare with it.</div>
+  </section>
+
+  <!-- 10 Closing the gate -->
+  <section class="book-page" aria-label="Step 8: Closing the gate">
+    <h1>Step 8: Closing the Gate</h1>
+    <p>This is the most important habit in the whole guide.</p>
+    <div class="code" data-label="PowerShell"><pre>exit</pre></div>
+    <p>Type <strong>exit</strong> and press <span class="highlight">Enter</span>. The window disappears.</p>
+    <h3>Why we close it</h3>
+    <p>When you finish walking around the house, you don't leave the yard gate open. An open PowerShell window is like that gate:</p>
+    <ul>
+      <li>Anyone who sits at your computer could type commands.</li>
+      <li>An accidental keystroke could run something you didn't mean to.</li>
+      <li>There's no reason to leave it open once you're done.</li>
+    </ul>
+    <p>From now on, every part ends by <strong>closing the gate</strong>, whether you used the visitor pass or the master keys.</p>
+  </section>
+
+  <!-- 11 Troubleshooting + when -->
+  <section class="book-page" aria-label="Troubleshooting and when to repeat">
+    <h1>Troubleshooting and When to Repeat</h1>
+    <div class="table-container">
+      <table>
+        <tr><th>Problem</th><th>Solution</th></tr>
+        <tr><td>"Access is denied"</td><td>Part 1 commands don't need the master keys. Check you typed the command exactly, or copy it with the Copy button.</td></tr>
+        <tr><td>Nothing happens</td><td>Press <span class="highlight">Enter</span> after the command.</td></tr>
+        <tr><td><code class="inline">&gt;&gt;</code> appears</td><td>PowerShell thinks the command isn't finished. Press <span class="highlight">Enter</span> once more. If that doesn't help, press <span class="highlight">Ctrl + C</span> and paste the command again.</td></tr>
+        <tr><td>The list is too long to read</td><td>Use the cleaner views in Steps 3 and 5.</td></tr>
+        <tr><td>You want an earlier command</td><td>Press the <span class="highlight">Up Arrow</span> key.</td></tr>
+      </table>
+    </div>
+    <h3>When to walk again</h3>
+    <div class="table-container">
+      <table>
+        <tr><th>When</th><th>Why</th><th>Time</th></tr>
+        <tr><td>First time</td><td>Learn what's normal on <em>your</em> computer</td><td>15 min</td></tr>
+        <tr><td>After installing new software</td><td>Check it didn't open new doors</td><td>5 min</td></tr>
+        <tr><td>Monthly</td><td>Part 5 sets this up as a regular patrol</td><td>5 min</td></tr>
+        <tr><td>If the computer acts strangely</td><td>Look for doors you don't recognize</td><td>10 min</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12 Summary + sources -->
+  <section class="book-page" aria-label="Summary">
+    <h1>Part 1 Complete</h1>
+    <ul class="checklist" style="margin-left:0">
+      <li><span aria-hidden="true">✓</span><span>Opened a standard Terminal (the visitor pass)</span></li>
+      <li><span aria-hidden="true">✓</span><span>Listed open doors with <code class="inline">netstat -ano</code></span></li>
+      <li><span aria-hidden="true">✓</span><span>Checked which side of the house each door faces</span></li>
+      <li><span aria-hidden="true">✓</span><span>Matched doors to program names</span></li>
+      <li><span aria-hidden="true">✓</span><span>Saved notes and closed the gate with <code class="inline">exit</code></span></li>
+    </ul>
+    <h2>Next: Part 2, Managing the Locks</h2>
+    <p>You'll choose your house type (Public or Private network), then lock the risky doors on your list using Windows Defender Firewall.</p>
+    <h3>Sources</h3>
+    <ul class="sources">
+      <li>Microsoft Learn, netstat: <a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netstat" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netstat</a></li>
+      <li>Microsoft Learn, Get-NetTCPConnection: <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/get-nettcpconnection" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/nettcpip/get-nettcpconnection</a></li>
+      <li>Microsoft Learn, Get-NetUDPEndpoint: <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/get-netudpendpoint" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/nettcpip/get-netudpendpoint</a></li>
+    </ul>
+  </section>
+
+</main>
+<script src="assets/guide.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

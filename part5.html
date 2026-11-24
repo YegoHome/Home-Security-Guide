@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Security Guide — Part 5: The Regular Patrol</title>
+<meta property="og:title" content="Home Security Guide — Part 5: The Regular Patrol">
+<meta name="description" content="Part 5 of 5: a read-only logbook script, a four-week schedule, safe temporary test doors, and a repeatable patrol checklist.">
+<meta property="og:description" content="Part 5 of 5: a read-only logbook script, a four-week schedule, safe temporary test doors, and a repeatable patrol checklist.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the guide</a>
+<header class="topbar">
+  <a class="home" href="index.html">Home Security Guide</a>
+  <nav aria-label="Parts of the guide">
+    <ul class="part-dots">
+      <li><a href="part1.html" aria-label="Part 1: The Security Walk">1</a></li>
+      <li><a href="part2.html" aria-label="Part 2: Managing the Locks">2</a></li>
+      <li><a href="part3.html" aria-label="Part 3: The Guest Rooms">3</a></li>
+      <li><a href="part4.html" aria-label="Part 4: Sealed Envelopes">4</a></li>
+      <li><a href="part5.html" aria-current="page" aria-label="Part 5: The Regular Patrol">5</a></li>
+    </ul>
+  </nav>
+  <button class="keyring-btn" type="button">Key Ring</button>
+</header>
+
+<main id="main" class="book-container" data-next-href="index.html" data-next-label="Back to the guide home">
+
+  <!-- 1 Cover -->
+  <section class="book-page" aria-label="Cover">
+    <div class="cover-page">
+      <p class="cover-kicker">Part 5 of 5</p>
+      <div class="cover-decorator" aria-hidden="true">🏠 📓</div>
+      <h1 class="cover-title">Your Home Security Guide</h1>
+      <p class="cover-subtitle">Part 5: The Regular Patrol</p>
+      <div class="decorative-line"></div>
+      <p>Homes change. New apps open doors, tests leave doors ajar, and old hallways get forgotten. A regular <strong>patrol</strong> catches these changes early.</p>
+      <div class="meta-row"><span>About 25 minutes to set up</span><span>5 minutes each month after that</span></div>
+      <button class="btn" type="button" data-action="next">Set up the patrol →</button>
+    </div>
+  </section>
+
+  <!-- 2 Metaphor -->
+  <section class="book-page" aria-label="How the patrol works">
+    <h1>How the Patrol Works</h1>
+    <div class="metaphor">
+      <span class="tag">The house metaphor</span>
+      <ul style="margin-bottom:0">
+        <li>The <strong>patrol</strong> is a regular walk through your home with a flashlight. It only looks and changes nothing.</li>
+        <li>The <strong>logbook</strong> is a dated text file the patrol writes, so you can compare this month with last month.</li>
+        <li>A <strong>temporary test door</strong> is a short-lived opening for testing. It's always named "TEMP - ", used only in the sealed wing or on your home network, and removed the same day.</li>
+      </ul>
+    </div>
+    <h2>What we'll set up</h2>
+    <ol>
+      <li>A read-only patrol script that writes a logbook</li>
+      <li>A schedule that runs it every four weeks</li>
+      <li>A way to compare two logbooks</li>
+      <li>A safe routine for temporary test doors</li>
+      <li>A monthly checklist</li>
+    </ol>
+  </section>
+
+  <!-- 3 Create script -->
+  <section class="book-page" aria-label="Step 1: Create the patrol script">
+    <h1>Step 1: Create the Patrol Script</h1>
+    <p>Open a standard <strong>Terminal</strong> and create a folder for the patrol:</p>
+    <div class="code" data-label="PowerShell"><pre>New-Item -ItemType Directory -Path "$env:USERPROFILE\SecurityPatrol" -Force
+notepad "$env:USERPROFILE\SecurityPatrol\Patrol.ps1"</pre></div>
+    <p>If Notepad asks whether to create a new file, select <strong>Yes</strong>. Copy the script on the next page into Notepad, then save it with <span class="highlight">Ctrl + S</span>.</p>
+    <div class="note"><strong>Why this folder?</strong> <code class="inline">$env:USERPROFILE</code> is your own user folder (for example, C:\Users\YourName). It isn't moved by OneDrive the way Documents or Desktop sometimes are, so the schedule always finds the script.</div>
+    <div class="ok"><strong>The script is read-only.</strong> Every command in it starts with <strong>Get-</strong>, which only reads information. The only thing it writes is the logbook file.</div>
+  </section>
+
+  <!-- 4 Script -->
+  <section class="book-page" aria-label="The patrol script">
+    <h1>The Patrol Script</h1>
+    <div class="code" data-label="Patrol.ps1"><pre># Patrol.ps1 - Home Security Guide, Part 5
+# Read-only: this script only looks and writes a logbook. It changes nothing.
+
+$folder = $PSScriptRoot
+$stamp  = Get-Date -Format 'yyyy-MM-dd_HHmm'
+$log    = Join-Path $folder "Patrol_$stamp.txt"
+
+function Add-Section {
+    param([string]$Title, $Data)
+    "`r`n=== $Title ===" | Out-File -FilePath $log -Append -Encoding utf8
+    if ($Data) { $Data | Out-String -Width 250 | Out-File -FilePath $log -Append -Encoding utf8 }
+    else       { '(none found)' | Out-File -FilePath $log -Append -Encoding utf8 }
+}
+
+$program = @{ Name = 'Program'; Expression = { (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName } }
+
+"Patrol run: $(Get-Date)   Computer: $env:COMPUTERNAME" | Out-File -FilePath $log -Encoding utf8
+
+Add-Section 'Open doors (TCP LISTENING) - Part 1' (Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+    Sort-Object LocalPort, LocalAddress | Select-Object LocalAddress, LocalPort, $program | Format-Table -AutoSize)
+
+Add-Section 'House type (network profile) - Part 2' (Get-NetConnectionProfile -ErrorAction SilentlyContinue |
+    Select-Object Name, InterfaceAlias, NetworkCategory | Format-Table -AutoSize)
+
+Add-Section 'My locks (Lock - rules) - Part 2' (Get-NetFirewallRule -DisplayName 'Lock - *' -ErrorAction SilentlyContinue |
+    Sort-Object DisplayName | Select-Object DisplayName, Enabled, Action, Profile | Format-Table -AutoSize)
+
+Add-Section 'Temporary test doors (TEMP - rules) - should be none' (Get-NetFirewallRule -DisplayName 'TEMP - *' -ErrorAction SilentlyContinue |
+    Select-Object DisplayName, Enabled, Action, Profile | Format-Table -AutoSize)
+
+Add-Section 'Hyper-V hallways (NAT static mappings) - Part 3' (Get-NetNatStaticMapping -ErrorAction SilentlyContinue |
+    Select-Object StaticMappingID, NatName, Protocol, ExternalPort, InternalIPAddress, InternalPort | Format-Table -AutoSize)
+
+Add-Section 'Remote Desktop envelope - Part 4' (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -ErrorAction SilentlyContinue |
+    Select-Object SecurityLayer, UserAuthentication | Format-List)
+
+Add-Section 'File sharing - Part 4' (Get-SmbServerConfiguration -ErrorAction SilentlyContinue |
+    Select-Object EnableSMB1Protocol, EncryptData | Format-List)</pre></div>
+    <p>The logbook leaves out process ID numbers on purpose. Those numbers change every time Windows restarts, so leaving them out keeps month-to-month comparisons clean.</p>
+  </section>
+
+  <!-- 5 Test run -->
+  <section class="book-page" aria-label="Step 2: Test the patrol">
+    <h1>Step 2: Do a Test Patrol</h1>
+    <p>Some readings, such as your firewall rules, may need the master keys. The scheduled patrol runs with them, so test it the same way: open <strong>Terminal (Admin)</strong> and run:</p>
+    <div class="code" data-label="PowerShell — Admin"><pre>powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\SecurityPatrol\Patrol.ps1"
+explorer "$env:USERPROFILE\SecurityPatrol"</pre></div>
+    <p>A File Explorer window opens with a new file named like <strong>Patrol_2026-11-09_1430.txt</strong>. Open it and check each section has content, or says <strong>(none found)</strong>.</p>
+    <div class="note"><strong>About <code class="inline">-ExecutionPolicy Bypass</code>:</strong> Windows blocks scripts by default. This option allows this one run only. It doesn't change your computer's settings.</div>
+    <div class="table-container">
+      <table>
+        <tr><th>If you see</th><th>Do this</th></tr>
+        <tr><td>"cannot be loaded because running scripts is disabled"</td><td>Make sure you included <code class="inline">-ExecutionPolicy Bypass</code> exactly as shown.</td></tr>
+        <tr><td>"cannot find the path"</td><td>Check the file is saved as <strong>Patrol.ps1</strong>, not Patrol.ps1.txt. In Notepad's Save dialog, set <strong>Save as type</strong> to <strong>All files</strong>.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 Schedule -->
+  <section class="book-page" aria-label="Step 3: Schedule the patrol">
+    <h1>Step 3: Schedule the Patrol</h1>
+    <p>In the same <strong>Terminal (Admin)</strong> window, run this to patrol every four weeks on Sunday at 9:00 AM:</p>
+    <div class="code" data-label="PowerShell — Admin"><pre>$script   = "$env:USERPROFILE\SecurityPatrol\Patrol.ps1"
+$action   = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
+$trigger  = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek Sunday -At 9am
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+Register-ScheduledTask -TaskName 'Home Security Patrol' -Action $action -Trigger $trigger -Settings $settings -RunLevel Highest</pre></div>
+    <ul>
+      <li><strong>Every four weeks:</strong> Microsoft documents <code class="inline">-WeeksInterval</code> as <a href="https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasktrigger" target="_blank" rel="noopener">the gap between weeks in the schedule</a>. This command doesn't offer a "monthly" option, so 4 is the closest.</li>
+      <li><strong>StartWhenAvailable</strong> runs a missed patrol as soon as possible, for example if the PC was off on Sunday morning.</li>
+      <li>The patrol runs while you're signed in. A window may flash briefly.</li>
+    </ul>
+    <h3>Manage the schedule</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-ScheduledTask -TaskName 'Home Security Patrol'            # check it exists
+Start-ScheduledTask -TaskName 'Home Security Patrol'          # run it now
+Unregister-ScheduledTask -TaskName 'Home Security Patrol' -Confirm:$false   # remove it</pre></div>
+  </section>
+
+  <!-- 7 Compare -->
+  <section class="book-page" aria-label="Step 4: Compare logbooks">
+    <h1>Step 4: Compare Two Logbooks</h1>
+    <p>Once you have two logbooks, this shows only what changed:</p>
+    <div class="code" data-label="PowerShell"><pre>$logs = Get-ChildItem "$env:USERPROFILE\SecurityPatrol\Patrol_*.txt" | Sort-Object LastWriteTime | Select-Object -Last 2
+Compare-Object (Get-Content $logs[0].FullName) (Get-Content $logs[1].FullName)</pre></div>
+    <div class="table-container">
+      <table>
+        <tr><th>Arrow</th><th>Meaning</th></tr>
+        <tr><td><code class="inline">=&gt;</code></td><td>Only in the <strong>newer</strong> logbook (something new appeared)</td></tr>
+        <tr><td><code class="inline">&lt;=</code></td><td>Only in the <strong>older</strong> logbook (something went away)</td></tr>
+      </table>
+    </div>
+    <p>The "Patrol run" date line always differs. That's expected.</p>
+    <h3>What to look for</h3>
+    <ul>
+      <li>A <strong>new open door</strong>: find who opened it (Part 1, Step 5).</li>
+      <li>A door that moved from an <strong>inside door</strong> (127.0.0.1) to a <strong>door on every side</strong> (0.0.0.0)</li>
+      <li>A lock showing <strong>Enabled False</strong>, or a lock missing (Part 2)</li>
+      <li>A house type that changed from Public to Private (Part 2, Step 1)</li>
+      <li>Any <strong>TEMP - </strong> rule still installed (Step 5 on the next page)</li>
+      <li>A new Hyper-V hallway you don't recognize (Part 3)</li>
+    </ul>
+  </section>
+
+  <!-- 8 Test doors -->
+  <section class="book-page" aria-label="Step 5: Temporary test doors">
+    <h1>Step 5: Temporary Test Doors, Done Safely</h1>
+    <p>Sometimes you need to open a door briefly, for example to test an app. Follow these four rules every time.</p>
+    <ol>
+      <li><strong>Test in the sealed wing first.</strong> Run the test between guest rooms on a Hyper-V <strong>Private</strong> switch or VirtualBox <strong>Internal Network</strong> (Part 3). Nothing outside the wing can reach it.</li>
+      <li><strong>If you must test on this PC,</strong> give the test door a household key and limit it to the Private house type.</li>
+      <li><strong>Name it with TEMP, the door number, and today's date.</strong></li>
+      <li><strong>Use a different door number each session</strong>, and remove the door the same day.</li>
+    </ol>
+    <h3>Check a door number is free</h3>
+    <div class="code" data-label="PowerShell"><pre>Get-NetTCPConnection -State Listen -LocalPort 8081 -ErrorAction SilentlyContinue</pre></div>
+    <p>No output means door 8081 isn't in use.</p>
+    <h3>Open the temporary test door (Terminal (Admin))</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>New-NetFirewallRule -DisplayName "TEMP - Test 8081 - 2026-11-09" -Direction Inbound -Protocol TCP -LocalPort 8081 -Action Allow -Profile Private -RemoteAddress LocalSubnet</pre></div>
+    <p>Change the door number and date each time. <code class="inline">-RemoteAddress LocalSubnet</code> is the household key. It's one of the <a href="https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule" target="_blank" rel="noopener">keywords Microsoft documents</a> for this setting.</p>
+    <div class="note">If your house type is <strong>Public</strong> (Part 2), this rule has no effect, because it only applies on Private networks. That's another reason the sealed wing is the better place to test.</div>
+  </section>
+
+  <!-- 9 Remove test doors -->
+  <section class="book-page" aria-label="Step 6: Remove test doors">
+    <h1>Step 6: Remove Every Test Door</h1>
+    <p>Firewall rules don't expire on their own. Remove test doors at the end of each session.</p>
+    <h3>See which test doors exist</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-NetFirewallRule -DisplayName "TEMP - *" | Format-Table DisplayName, Enabled, Profile -AutoSize</pre></div>
+    <h3>Remove all of them</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-NetFirewallRule -DisplayName "TEMP - *" | Remove-NetFirewallRule</pre></div>
+    <h3>Confirm they're gone</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-NetFirewallRule -DisplayName "TEMP - *" -ErrorAction SilentlyContinue</pre></div>
+    <p><strong>No output</strong> means every test door is removed. Your next patrol logbook will show <strong>(none found)</strong> in the temporary test doors section.</p>
+    <div class="warning"><strong>Also check the guest rooms.</strong> If you added test doors or hallways inside a guest room, remove them there too (Part 3, Step 6). Then close the gate with <code class="inline">exit</code>.</div>
+  </section>
+
+  <!-- 10 Checklist -->
+  <section class="book-page" aria-label="Step 7: Monthly patrol checklist">
+    <h1>Step 7: Your Monthly Patrol Checklist</h1>
+    <p>Tick each item as you go. The ticks reset when you leave the page, ready for next month.</p>
+    <p class="check-progress" aria-live="polite"></p>
+    <ul class="checklist" id="patrol-list">
+      <li><input type="checkbox" id="c1"><label for="c1">This month's logbook exists (or I ran the patrol now). <em>Step 2</em></label></li>
+      <li><input type="checkbox" id="c2"><label for="c2">I compared it with last month's logbook and can explain every new door. <em>Step 4, Part 1</em></label></li>
+      <li><input type="checkbox" id="c3"><label for="c3">Every <strong>Lock - </strong> rule shows Enabled True and Action Block. <em>Part 2</em></label></li>
+      <li><input type="checkbox" id="c4"><label for="c4">My house type is still what I chose (Public or Private). <em>Part 2</em></label></li>
+      <li><input type="checkbox" id="c5"><label for="c5">No <strong>TEMP - </strong> rules remain, on this PC or in any guest room. <em>Step 6</em></label></li>
+      <li><input type="checkbox" id="c6"><label for="c6">I walked each guest room from the inside and removed hallways I don't use. <em>Part 3</em></label></li>
+      <li><input type="checkbox" id="c7"><label for="c7">Remote Desktop is off, or NLA is on and it has a household key. <em>Part 4</em></label></li>
+      <li><input type="checkbox" id="c8"><label for="c8">EnableSMB1Protocol is still False. <em>Part 4</em></label></li>
+      <li><input type="checkbox" id="c9"><label for="c9">I closed the gate (<code class="inline">exit</code>) in every window I opened.</label></li>
+    </ul>
+    <p><button class="btn secondary" type="button" data-reset="patrol-list">Reset checklist</button></p>
+    <div class="note"><strong>Guest rooms get a patrol too.</strong> In each Windows guest room, repeat Steps 1–3 inside the guest so it keeps its own logbook.</div>
+  </section>
+
+  <!-- 11 Graduation -->
+  <section class="book-page" aria-label="Congratulations">
+    <h1>Congratulations, You Did It</h1>
+    <p class="lead">You've completed all five parts of your digital home security guide.</p>
+    <div class="table-container">
+      <table>
+        <tr><th>Part</th><th>What you can now do</th></tr>
+        <tr><td><a href="part1.html">1. The Security Walk</a></td><td>Find open doors, the program behind each one, and which side of the house it faces</td></tr>
+        <tr><td><a href="part2.html">2. Managing the Locks</a></td><td>Choose your house type, add <strong>Lock - </strong> rules, give household keys, and undo any lock</td></tr>
+        <tr><td><a href="part3.html">3. The Guest Rooms</a></td><td>Lock each virtual machine and find, log, and remove hallways</td></tr>
+        <tr><td><a href="part4.html">4. Sealed Envelopes</a></td><td>Check Remote Desktop, file sharing, and TLS versions</td></tr>
+        <tr><td><a href="part5.html">5. The Regular Patrol</a></td><td>Keep a dated logbook, compare months, and use temporary test doors safely</td></tr>
+      </table>
+    </div>
+    <div class="ok"><strong>Remember:</strong> if anything stops working after a change, undo that one change first (Part 2, Step 8). You always have the power to undo.</div>
+  </section>
+
+  <!-- 12 Sources -->
+  <section class="book-page" aria-label="Sources">
+    <h1>Part 5 Sources</h1>
+    <ul class="sources">
+      <li>Microsoft Learn, New-ScheduledTaskTrigger: <a href="https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasktrigger" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasktrigger</a></li>
+      <li>Microsoft Learn, New-ScheduledTaskSettingsSet: <a href="https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/new-scheduledtasksettingsset</a></li>
+      <li>Microsoft Learn, Register-ScheduledTask: <a href="https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/register-scheduledtask" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/scheduledtasks/register-scheduledtask</a></li>
+      <li>Microsoft Learn, New-NetFirewallRule: <a href="https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule</a></li>
+      <li>Microsoft Learn, Remove-NetFirewallRule: <a href="https://learn.microsoft.com/en-us/powershell/module/netsecurity/remove-netfirewallrule" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netsecurity/remove-netfirewallrule</a></li>
+      <li>Microsoft Learn, Get-NetConnectionProfile: <a href="https://learn.microsoft.com/en-us/powershell/module/netconnection/get-netconnectionprofile" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netconnection/get-netconnectionprofile</a></li>
+      <li>Microsoft Learn, Compare-Object: <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/compare-object" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/compare-object</a></li>
+      <li>Microsoft Learn, about_Execution_Policies: <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies</a></li>
+    </ul>
+  </section>
+
+</main>
+<script src="assets/guide.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

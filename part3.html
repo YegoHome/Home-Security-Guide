@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Security Guide — Part 3: The Guest Rooms</title>
+<meta property="og:title" content="Home Security Guide — Part 3: The Guest Rooms">
+<meta name="description" content="Part 3 of 5: lock the firewall inside each virtual machine and remove port-forwarding rules you no longer use in Hyper-V and VirtualBox.">
+<meta property="og:description" content="Part 3 of 5: lock the firewall inside each virtual machine and remove port-forwarding rules you no longer use in Hyper-V and VirtualBox.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the guide</a>
+<header class="topbar">
+  <a class="home" href="index.html">Home Security Guide</a>
+  <nav aria-label="Parts of the guide">
+    <ul class="part-dots">
+      <li><a href="part1.html" aria-label="Part 1: The Security Walk">1</a></li>
+      <li><a href="part2.html" aria-label="Part 2: Managing the Locks">2</a></li>
+      <li><a href="part3.html" aria-current="page" aria-label="Part 3: The Guest Rooms">3</a></li>
+      <li><a href="part4.html" aria-label="Part 4: Sealed Envelopes">4</a></li>
+      <li><a href="part5.html" aria-label="Part 5: The Regular Patrol">5</a></li>
+    </ul>
+  </nav>
+  <button class="keyring-btn" type="button">Key Ring</button>
+</header>
+
+<main id="main" class="book-container" data-next-href="part4.html" data-next-label="Go to Part 4">
+
+  <!-- 1 Cover -->
+  <section class="book-page" aria-label="Cover">
+    <div class="cover-page">
+      <p class="cover-kicker">Part 3 of 5</p>
+      <div class="cover-decorator" aria-hidden="true">🏠 🛏️</div>
+      <h1 class="cover-title">Your Home Security Guide</h1>
+      <p class="cover-subtitle">Part 3: The Guest Rooms</p>
+      <div class="decorative-line"></div>
+      <p>Your front doors are locked. But if you run <strong>virtual machines</strong>, you also have <strong>guest rooms</strong> inside your home, and each one has its own doors.</p>
+      <div class="meta-row"><span>About 20 minutes per guest room</span><span>Administrator permission needed</span></div>
+      <p class="path-badge">No virtual machines? You can skip ahead to <a href="part4.html">Part 4</a>.</p>
+      <button class="btn" type="button" data-action="next">Visit the guest rooms →</button>
+    </div>
+  </section>
+
+  <!-- 2 Metaphor -->
+  <section class="book-page" aria-label="How guest rooms work">
+    <h1>How Guest Rooms Work</h1>
+    <div class="metaphor">
+      <span class="tag">The house metaphor</span>
+      <ul style="margin-bottom:0">
+        <li>A <strong>guest room</strong> (virtual machine) is a separate computer running inside yours. It has <strong>its own doors and its own locks</strong>.</li>
+        <li>The locks from Part 2 protect <strong>your</strong> doors. They don't lock the guest room's doors. Each guest room needs its own walk and its own locks.</li>
+        <li>A <strong>hallway</strong> (port forwarding rule) leads visitors from one of your outside doors straight to a guest room door. Every hallway stays open until you remove it.</li>
+        <li>The <strong>sealed wing</strong> is a virtual network only your guest rooms share. It's the safest place for testing (Part 5).</li>
+      </ul>
+    </div>
+    <h2>What we'll do</h2>
+    <ol>
+      <li>Find out which guest-room program you use.</li>
+      <li>Check how each guest room connects to the outside.</li>
+      <li>Walk and lock each guest room from the inside.</li>
+      <li>Find every hallway, log it, and remove the ones you no longer need.</li>
+    </ol>
+  </section>
+
+  <!-- 3 Which tool -->
+  <section class="book-page" aria-label="Step 1: Which guest room program">
+    <h1>Step 1: Which Program Builds Your Guest Rooms?</h1>
+    <p>Press the Windows key and type the names below. Whatever appears tells you what you have.</p>
+    <div class="table-container">
+      <table>
+        <tr><th>Search for</th><th>Program</th><th>Works on</th></tr>
+        <tr><td><strong>Hyper-V Manager</strong></td><td>Microsoft Hyper-V (built into Windows)</td><td>Windows 11 Pro and Enterprise only. It <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v" target="_blank" rel="noopener">can't be installed on Windows 11 Home</a>.</td></tr>
+        <tr><td><strong>VirtualBox</strong></td><td>Oracle VirtualBox (separate download)</td><td>Windows 11 Home and Pro</td></tr>
+      </table>
+    </div>
+    <p>This guide covers <strong>Hyper-V</strong> and <strong>VirtualBox</strong>. If you use something else, its own documentation will show where its network and port forwarding settings are. The ideas on these pages still apply.</p>
+    <div class="note">Write down the <strong>name of every guest room</strong> (virtual machine) you see in Hyper-V Manager or VirtualBox. You'll need these names soon.</div>
+  </section>
+
+  <!-- 4 Connection types -->
+  <section class="book-page" aria-label="Step 2: How each guest room connects">
+    <h1>Step 2: How Does Each Guest Room Connect?</h1>
+    <p>Each guest room's network setting decides who can reach its doors.</p>
+    <div class="table-container">
+      <table>
+        <tr><th>Setting</th><th>In the house</th><th>Who can reach the guest room</th></tr>
+        <tr><td>Hyper-V <strong>External</strong> switch · VirtualBox <strong>Bridged</strong></td><td>The guest room has its own door to the street</td><td>Other devices on your network, like any other computer</td></tr>
+        <tr><td>Hyper-V <strong>Internal</strong> switch · VirtualBox <strong>Host-only</strong></td><td>The door opens only into your home</td><td>Your computer and other guest rooms on the same setting</td></tr>
+        <tr><td>Hyper-V <strong>Private</strong> switch · VirtualBox <strong>Internal Network</strong></td><td>The <strong>sealed wing</strong></td><td>Only other guest rooms on the same network, not even your computer</td></tr>
+        <tr><td>VirtualBox <strong>NAT</strong> (the default)</td><td>The guest shares your front door</td><td>Nobody from outside, <strong>unless you add a hallway</strong></td></tr>
+      </table>
+    </div>
+    <h3>Check Hyper-V (Terminal (Admin))</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-VMSwitch | Format-Table Name, SwitchType -AutoSize
+Get-VMNetworkAdapter -VMName * | Format-Table VMName, SwitchName, IPAddresses -AutoSize</pre></div>
+    <h3>Check VirtualBox</h3>
+    <p>Select a guest room → <strong>Settings</strong> → <strong>Network</strong>. Each enabled adapter shows <strong>Attached to</strong> (NAT, Bridged Adapter, Internal Network, Host-only Adapter, and so on).</p>
+    <p>Sources: <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines" target="_blank" rel="noopener">Microsoft Learn, Hyper-V virtual switches</a>; <a href="https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html" target="_blank" rel="noopener">Oracle VirtualBox networking modes</a>.</p>
+  </section>
+
+  <!-- 5 Walk inside -->
+  <section class="book-page" aria-label="Step 3: Walk and lock each guest room">
+    <h1>Step 3: Walk and Lock Each Guest Room</h1>
+    <p>Start the guest room and sign in <strong>inside it</strong>. Everything on this page happens inside the guest, not on your own computer.</p>
+    <h3>Windows guest rooms</h3>
+    <ol>
+      <li>Repeat the <a href="part1.html">Part 1 Security Walk</a> inside the guest.</li>
+      <li>Repeat the <a href="part2.html">Part 2 locks</a> inside the guest, using the same <strong>Lock - </strong> names.</li>
+      <li>Close the gate (<code class="inline">exit</code>) inside the guest when done.</li>
+    </ol>
+    <h3>Linux guest rooms (Ubuntu example)</h3>
+    <p>List open doors and mail slots with the program behind each:</p>
+    <div class="code" data-label="Ubuntu terminal"><pre>sudo ss -tulpn</pre></div>
+    <p>Check the guest room's own locks (Ubuntu's built-in firewall, ufw):</p>
+    <div class="code" data-label="Ubuntu terminal"><pre>sudo ufw status verbose</pre></div>
+    <div class="note">If ufw says <strong>inactive</strong>, the guest room has no locks of its own. Ubuntu's ufw documentation explains how to turn it on. Before you do, allow any door you still need, such as SSH if you connect that way.</div>
+    <div class="ok"><strong>Same rule in every room:</strong> a door bound to <code class="inline">127.0.0.1</code> is an inside door. A door on <code class="inline">0.0.0.0</code> or <code class="inline">[::]</code> (shown as <code class="inline">*</code> in ss) faces every side of the guest room.</div>
+  </section>
+
+  <!-- 6 Find hallways -->
+  <section class="book-page" aria-label="Step 4: Find every hallway">
+    <h1>Step 4: Find Every Hallway</h1>
+    <h3>Hyper-V hallways (Terminal (Admin))</h3>
+    <div class="code" data-label="PowerShell — Admin"><pre>Get-NetNat
+Get-NetNatStaticMapping |
+  Format-Table StaticMappingID, NatName, Protocol, ExternalPort, InternalIPAddress, InternalPort -AutoSize</pre></div>
+    <p>Each line from <code class="inline">Get-NetNatStaticMapping</code> is one hallway: visitors who arrive at <strong>ExternalPort</strong> are walked to <strong>InternalIPAddress : InternalPort</strong> in a guest room. Source: <a href="https://learn.microsoft.com/en-us/powershell/module/netnat/get-netnatstaticmapping" target="_blank" rel="noopener">Microsoft Learn, Get-NetNatStaticMapping</a>.</p>
+    <div class="ok"><strong>No output?</strong> You have no Hyper-V hallways of this kind. That's a good result.</div>
+    <h3>VirtualBox hallways</h3>
+    <p><strong>By clicking:</strong> select the guest room → <strong>Settings</strong> → <strong>Network</strong> → an adapter set to <strong>NAT</strong> → expand <strong>Advanced</strong> → <strong>Port Forwarding</strong>.</p>
+    <p><strong>By command</strong> (standard Terminal on your computer; replace <em>VM name</em>):</p>
+    <div class="code" data-label="PowerShell"><pre>&amp; "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" showvminfo "VM name" | findstr Rule</pre></div>
+    <p>Each <strong>Rule</strong> line is one hallway, showing its name, host port (outside door), and guest port (guest room door).</p>
+  </section>
+
+  <!-- 7 Hallway log -->
+  <section class="book-page" aria-label="Step 5: Log every hallway">
+    <h1>Step 5: Log Every Hallway</h1>
+    <p>For each hallway you found, decide: <strong>Keep</strong> (you use it now) or <strong>Remove</strong> (you don't). Record it here so nothing is forgotten.</p>
+    <form id="hallway-form" class="logform" autocomplete="off">
+      <label>Guest room<input name="room" placeholder="e.g. Lab-Server"></label>
+      <label>Program<select name="tool"><option>Hyper-V</option><option>VirtualBox</option><option>Other</option></select></label>
+      <label>Outside door<input name="outside" placeholder="e.g. TCP 2222"></label>
+      <label>Guest door<input name="inside" placeholder="e.g. 22"></label>
+      <label>Decision<select name="decision"><option>Remove</option><option>Keep</option></select></label>
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Guest room</th><th>Program</th><th>Outside door</th><th>Guest door</th><th>Decision</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody id="hallway-rows"></tbody>
+      </table>
+    </div>
+    <p><button class="btn secondary" type="button" id="hallway-copy">Copy log as text</button></p>
+    <div class="note">This log isn't saved when you leave the page. Copy it into your <strong>Security_Walk_Notes.txt</strong> file from Part 1.</div>
+  </section>
+
+  <!-- 8 Remove hallways -->
+  <section class="book-page" aria-label="Step 6: Remove stale hallways">
+    <h1>Step 6: Remove Stale Hallways</h1>
+    <h3>Hyper-V (Terminal (Admin))</h3>
+    <p>Use the <strong>StaticMappingID</strong> number from Step 4. This example removes hallway number 3:</p>
+    <div class="code" data-label="PowerShell — Admin"><pre>Remove-NetNatStaticMapping -StaticMappingID 3</pre></div>
+    <div class="warning"><strong>Always include the ID.</strong> Microsoft's documentation shows that <code class="inline">Remove-NetNatStaticMapping</code> with no ID <a href="https://learn.microsoft.com/en-us/powershell/module/netnat/remove-netnatstaticmapping" target="_blank" rel="noopener">removes every static mapping</a> on the computer.</div>
+    <h3>VirtualBox</h3>
+    <p><strong>By clicking:</strong> open the <strong>Port Forwarding</strong> window from Step 4, select the rule, click the remove (minus) button, then <strong>OK</strong>.</p>
+    <p><strong>By command</strong>, replacing <em>VM name</em> and <em>rule name</em>. If the guest room is <strong>switched off</strong>:</p>
+    <div class="code" data-label="PowerShell"><pre>&amp; "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" modifyvm "VM name" --natpf1 delete "rule name"</pre></div>
+    <p>If the guest room is <strong>running</strong>:</p>
+    <div class="code" data-label="PowerShell"><pre>&amp; "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "VM name" natpf1 delete "rule name"</pre></div>
+    <p><code class="inline">natpf1</code> means adapter 1. Use <code class="inline">natpf2</code> for adapter 2, and so on. Source: <a href="https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html" target="_blank" rel="noopener">Oracle VBoxManage reference</a>.</p>
+  </section>
+
+  <!-- 9 Verify -->
+  <section class="book-page" aria-label="Step 7: Verify">
+    <h1>Step 7: Check the Hallways Are Gone</h1>
+    <ol>
+      <li>Run the Step 4 commands again. The hallways you removed should no longer be listed.</li>
+      <li>On your own computer, check whether anything is still listening on the old outside door (replace 2222 with your port):</li>
+    </ol>
+    <div class="code" data-label="PowerShell"><pre>Get-NetTCPConnection -State Listen -LocalPort 2222 -ErrorAction SilentlyContinue</pre></div>
+    <p><strong>No output</strong> means that outside door is closed.</p>
+    <h3>Remove leftover locks or openings for removed hallways</h3>
+    <p>If you ever added a firewall rule on your computer to let visitors into a hallway, remove that too. In <strong>wf.msc</strong> → <strong>Inbound Rules</strong>, find the rule by its name, right-click → <strong>Delete</strong>.</p>
+    <div class="ok"><strong>Close the gate</strong> in every window you opened, on your computer and inside each guest room.</div>
+  </section>
+
+  <!-- 10 Summary -->
+  <section class="book-page" aria-label="Summary">
+    <h1>Part 3 Complete</h1>
+    <ul class="checklist" style="margin-left:0">
+      <li><span aria-hidden="true">✓</span><span>Identified your guest-room program and every guest room</span></li>
+      <li><span aria-hidden="true">✓</span><span>Checked how each guest room connects to the outside</span></li>
+      <li><span aria-hidden="true">✓</span><span>Walked and locked each guest room from the inside</span></li>
+      <li><span aria-hidden="true">✓</span><span>Logged every hallway and removed the ones you don't use</span></li>
+      <li><span aria-hidden="true">✓</span><span>Confirmed the old outside doors are closed</span></li>
+    </ul>
+    <h2>Next: Part 4, Sealed Envelopes</h2>
+    <p>Locks decide <em>who</em> can reach a door. Part 4 makes sure that what's said through the doors you keep open is sealed (encrypted).</p>
+    <h3>Sources</h3>
+    <ul class="sources">
+      <li>Microsoft Learn, install Hyper-V (edition requirements): <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/install-hyper-v</a></li>
+      <li>Microsoft Learn, Hyper-V virtual switches: <a href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/create-a-virtual-switch-for-hyper-v-virtual-machines</a></li>
+      <li>Microsoft Learn, Get-NetNatStaticMapping: <a href="https://learn.microsoft.com/en-us/powershell/module/netnat/get-netnatstaticmapping" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netnat/get-netnatstaticmapping</a></li>
+      <li>Microsoft Learn, Remove-NetNatStaticMapping: <a href="https://learn.microsoft.com/en-us/powershell/module/netnat/remove-netnatstaticmapping" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/module/netnat/remove-netnatstaticmapping</a></li>
+      <li>Oracle VirtualBox networking modes: <a href="https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html" target="_blank" rel="noopener">https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/networkingdetails.html</a></li>
+      <li>Oracle VBoxManage reference: <a href="https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html" target="_blank" rel="noopener">https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/vboxmanage.html</a></li>
+    </ul>
+  </section>
+
+</main>
+<script src="assets/guide.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>
