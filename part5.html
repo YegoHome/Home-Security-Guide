@@ -125,7 +125,7 @@ Add-Section 'File sharing - Part 4' (Get-SmbServerConfiguration -ErrorAction Sil
     <p>Some readings, such as your firewall rules, may need the master keys. The scheduled patrol runs with them, so test it the same way: open <strong>Terminal (Admin)</strong> and run:</p>
     <div class="code" data-label="PowerShell — Admin"><pre>powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\SecurityPatrol\Patrol.ps1"
 explorer "$env:USERPROFILE\SecurityPatrol"</pre></div>
-    <p>A File Explorer window opens with a new file named like <strong>Patrol_2026-11-09_1430.txt</strong>. Open it and check each section has content, or says <strong>(none found)</strong>.</p>
+    <p>A File Explorer window opens with a new file named like <strong>Patrol_YYYY-MM-DD_1430.txt</strong>. Open it and check each section has content, or says <strong>(none found)</strong>.</p>
     <div class="note"><strong>About <code class="inline">-ExecutionPolicy Bypass</code>:</strong> Windows blocks scripts by default. This option allows this one run only. It doesn't change your computer's settings.</div>
     <div class="table-container">
       <table>
