@@ -243,10 +243,9 @@
     <p>Each lock should show <strong>Enabled: True</strong> and <strong>Action: Block</strong>. If Windows says access is denied, close the window and use <strong>Terminal (Admin)</strong> for this check.</p>
     <h3>Optional: test from another Windows PC</h3>
     <ol>
-      <li>On <strong>this</strong> PC, run <code class="inline">ipconfig</code> and note the <strong>IPv4 Address</strong> (for example, 192.168.1.25).</li>
+      <li>On <strong>this</strong> PC, run <code class="inline">ipconfig</code> and note the <strong>IPv4 Address</strong> (for example, 192.168.X.X).</li>
       <li>On <strong>another</strong> Windows PC on the same network, open Terminal and run:</li>
     </ol>
-    <div class="code" data-label="PowerShell — on the other PC"><pre>Test-NetConnection -ComputerName 192.168.1.25 -Port 135</pre></div>
     <p>Replace the address with yours. <strong>TcpTestSucceeded : False</strong> means the door stayed shut. The test may pause for a while first, because Windows Firewall drops blocked visitors without replying.</p>
     <p class="path-only path-B"><strong>Path B note:</strong> if your network is set to Private, a test of door 445 from a home device can succeed. That's expected, because devices on your home network have a household key.</p>
     <p>Finish by typing <code class="inline">exit</code> to <strong>close the gate</strong>.</p>
