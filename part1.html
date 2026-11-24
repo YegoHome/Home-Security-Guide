@@ -126,13 +126,13 @@
   TCP    0.0.0.0:135          0.0.0.0:0            LISTENING    1052
   TCP    0.0.0.0:445          0.0.0.0:0            LISTENING    4
   TCP    127.0.0.1:5354       0.0.0.0:0            LISTENING    3920
-  TCP    192.168.1.25:139     0.0.0.0:0            LISTENING    4</pre></div>
+  TCP    192.168.X.X:139      0.0.0.0:0            LISTENING    4</pre></div>
     <div class="table-container">
       <table>
         <tr><th>Local Address starts with</th><th>In the house</th><th>Who could reach it</th></tr>
         <tr><td><code class="inline">0.0.0.0</code> or <code class="inline">[::]</code></td><td><strong>Door on every side</strong></td><td>Devices on any network this computer is connected to, unless a lock stops them</td></tr>
         <tr><td><code class="inline">127.0.0.1</code> or <code class="inline">[::1]</code></td><td><strong>Inside door</strong></td><td>Only programs on this same computer</td></tr>
-        <tr><td>A specific address, such as <code class="inline">192.168.1.25</code></td><td>A door on <strong>one</strong> side</td><td>Devices on the network that address belongs to</td></tr>
+        <tr><td>A specific address, such as <code class="inline">192.168.X.X</code></td><td>A door on <strong>one</strong> side</td><td>Devices on the network that address belongs to</td></tr>
       </table>
     </div>
     <div class="note"><strong>What to write down:</strong> every LISTENING line whose address starts with <code class="inline">0.0.0.0</code>, <code class="inline">[::]</code>, or a specific address. Inside doors (<code class="inline">127.0.0.1</code>, <code class="inline">[::1]</code>) can't be reached from other devices.</div>
