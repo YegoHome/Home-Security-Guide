@@ -74,6 +74,54 @@
     } catch (e) { fallback(); }
   }
 
+
+  /* ---------- Optional services (set in assets/site-config.js) ---------- */
+  var CFG = window.SITE_CONFIG || {};
+  function giscusReady() {
+    var g = CFG.giscus || {};
+    return !!(g.repo && g.repoId && g.category && g.categoryId);
+  }
+  function prepComments() {
+    if (giscusReady()) return;
+    $all('.comments-page').forEach(function (p) { p.parentNode.removeChild(p); });
+  }
+  function loadComments(page) {
+    var slot = $('.giscus', page);
+    if (!slot || slot.getAttribute('data-loaded')) return;
+    slot.setAttribute('data-loaded', '1');
+    var g = CFG.giscus, s = document.createElement('script');
+    var attrs = {
+      'data-repo': g.repo, 'data-repo-id': g.repoId,
+      'data-category': g.category, 'data-category-id': g.categoryId,
+      'data-mapping': 'pathname', 'data-strict': '1', 'data-reactions-enabled': '1',
+      'data-emit-metadata': '0', 'data-input-position': 'top', 'data-theme': 'light',
+      'data-lang': 'en', 'data-loading': 'lazy'
+    };
+    Object.keys(attrs).forEach(function (k) { s.setAttribute(k, attrs[k]); });
+    s.src = 'https://giscus.app/client.js'; s.crossOrigin = 'anonymous'; s.async = true;
+    slot.appendChild(s);
+  }
+  function loadCounter() {
+    var c = (CFG.goatcounter || {}).code;
+    if (!c || !/^[a-z0-9-]+$/.test(c)) return;
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://gc.zgo.at/count.js';
+    s.setAttribute('data-goatcounter', 'https://' + c + '.goatcounter.com/count');
+    document.body.appendChild(s);
+  }
+  var finishedSent = false;
+  function countFinish(i) {
+    if (finishedSent) return;
+    var pages = state.pages, last = pages.length - 1;
+    while (last > 0 && pages[last].classList.contains('comments-page')) last--;
+    if (i < last) return;
+    var gc = window.goatcounter;
+    if (!gc || typeof gc.count !== 'function') return;
+    var cur = document.querySelector('.part-dots a[aria-current="page"]');
+    finishedSent = true;
+    gc.count({ path: 'finished-part-' + (cur ? cur.textContent.trim() : 'home'), title: 'Reached the end of a part', event: true });
+  }
+
   /* ---------- Pages ---------- */
   function show(i, focus) {
     var pages = state.pages; if (!pages.length) return;
@@ -82,6 +130,8 @@
     var el = pages[i]; state.page = i;
     el.classList.add('active'); el.removeAttribute('aria-hidden');
     requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('shown'); }); });
+    if (el.classList.contains('comments-page')) loadComments(el);
+    countFinish(i);
     var bar = $('.progress > span'); if (bar) bar.style.width = ((i + 1) / pages.length * 100) + '%';
     var pr = $('.progress'); if (pr) pr.setAttribute('aria-valuenow', String(i + 1));
     if (focus) {
@@ -265,6 +315,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    prepComments(); loadCounter();
     buildCode(); buildKeyRing(); buildChooser(); buildChecklists(); buildLog(); buildPages();
     if (state.path) carryPath(state.path);
   });

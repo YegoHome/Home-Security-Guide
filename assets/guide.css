@@ -292,3 +292,5 @@ html { background: #e8d7c3; }
 .skip-link { position: absolute; left: 12px; top: -48px; background: var(--btn); color: #fff; padding: 8px 14px; border-radius: 5px; z-index: 20; text-decoration: none; }
 .skip-link:focus { top: 12px; }
 .reviewed { font-size: 13px; color: var(--muted); text-align: center; margin-top: 10px; }
+.fine-print { font-size: 14px; color: var(--muted); }
+.giscus { margin-top: 18px; min-height: 120px; }

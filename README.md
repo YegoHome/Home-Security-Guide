@@ -17,3 +17,10 @@ Static HTML, CSS, and JavaScript. No build step, no tracking, no data stored. Op
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). The original is changed only by the maintainer after review. Anyone can make their own copy (fork).
+
+## Comments and visit counting (optional)
+
+Both features are off until you fill in `assets/site-config.js`, the only file you need to edit.
+
+- **Comments (giscus):** copy `data-repo`, `data-repo-id`, `data-category` and `data-category-id` from https://giscus.app into the `giscus` section. A "Questions and Comments" page then appears at the end of each part. If any value is empty, that page stays hidden.
+- **Visit counting (GoatCounter):** put your GoatCounter code (the part before `.goatcounter.com`) into `goatcounter.code`. The guide counts one view per part file and sends a `finished-part-N` event when a reader reaches the last lesson page of a part.
